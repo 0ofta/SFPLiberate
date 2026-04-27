@@ -1,6 +1,6 @@
 # SFPLiberate Home Assistant Add-On
 
-[![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fjosiah-nelson%2FSFPLiberate)
+[![Add to Home Assistant](https://ha.techy.no/badges/supervisor_addon.svg)](https://ha.techy.no/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2F0ofta%2FSFPLiberate)
 
 Bluetooth companion for the Ubiquiti SFP Wizard (UACC-SFP-Wizard). Capture, clone, and manage unlimited SFP/SFP+ module EEPROM profiles directly from your Home Assistant instance.
 
