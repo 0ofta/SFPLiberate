@@ -70,4 +70,4 @@ schema:
   ble_trace_logging: bool
 
 # Image configuration
-image: "ghcr.io/0ofta/sfpliberate-addon-{arch}"
+# image: "ghcr.io/0ofta/sfpliberate-addon-{arch}"
