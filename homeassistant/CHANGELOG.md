@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Web Bluetooth device discovery no longer silently fails to find Ubiquiti's
   own `UACC-SFP-Wizard` hardware, whose name doesn't start with `SFP` (see #122)
 
+### Changed
+- Removed the `image:` key from config.yaml so Supervisor always builds the
+  add-on locally from this repo's Dockerfile instead of pulling a prebuilt
+  image from a registry - this repo no longer depends on any CI publish
+  step succeeding for the add-on to install
+- Repointed repository/image metadata (config.yaml, build.yaml, Dockerfile
+  labels, repository.json, README badge) from `josiah-nelson/SFPLiberate`
+  to this fork so the add-on's own self-description is accurate
+
 ## [Unreleased]
 
 ### Added

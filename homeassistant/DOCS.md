@@ -8,7 +8,7 @@ SFPLiberate is a Home Assistant add-on that provides a web-based interface for m
 
 1. Add the SFPLiberate repository to Home Assistant:
    - Click the "Add to Home Assistant" button in the README
-   - OR manually add: `https://github.com/josiah-nelson/SFPLiberate`
+   - OR manually add: `https://github.com/0ofta/SFPLiberate`
 
 2. Install the add-on:
    - Settings → Add-ons → Add-on Store

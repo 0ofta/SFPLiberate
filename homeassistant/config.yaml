@@ -2,7 +2,7 @@ name: "SFPLiberate"
 version: "0.2.1"
 slug: "sfpliberate"
 description: "Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and manage SFP module EEPROM profiles"
-url: "https://github.com/josiah-nelson/SFPLiberate"
+url: "https://github.com/0ofta/SFPLiberate"
 
 stage: experimental
 arch:
@@ -68,6 +68,3 @@ schema:
   database_backup_max_count: int(1,30)
   enable_debug_ble: bool
   ble_trace_logging: bool
-
-# Image configuration
-image: "ghcr.io/josiah-nelson/sfpliberate-addon-{arch}"

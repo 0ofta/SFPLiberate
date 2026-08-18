@@ -109,15 +109,15 @@ LABEL \
     io.hass.arch="aarch64|amd64|armhf|armv7" \
     io.hass.type="addon" \
     io.hass.version="${BUILD_VERSION}" \
-    maintainer="Josiah Nelson <https://github.com/josiah-nelson>" \
+    maintainer="0ofta <https://github.com/0ofta>" \
     org.opencontainers.image.title="SFPLiberate" \
     org.opencontainers.image.description="Bluetooth companion for Ubiquiti SFP Wizard" \
     org.opencontainers.image.vendor="SFPLiberate" \
-    org.opencontainers.image.authors="Josiah Nelson" \
+    org.opencontainers.image.authors="Josiah Nelson, 0ofta" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.url="https://github.com/josiah-nelson/SFPLiberate" \
-    org.opencontainers.image.source="https://github.com/josiah-nelson/SFPLiberate" \
-    org.opencontainers.image.documentation="https://github.com/josiah-nelson/SFPLiberate/blob/main/docs/HOME_ASSISTANT.md" \
+    org.opencontainers.image.url="https://github.com/0ofta/SFPLiberate" \
+    org.opencontainers.image.source="https://github.com/0ofta/SFPLiberate" \
+    org.opencontainers.image.documentation="https://github.com/0ofta/SFPLiberate/blob/main/docs/HOME_ASSISTANT.md" \
     org.opencontainers.image.version="${BUILD_VERSION}"
 
 # Start via s6-overlay (base image handles this)
