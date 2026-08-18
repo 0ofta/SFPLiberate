@@ -75,12 +75,20 @@ async function requestSfpDevice(): Promise<any> {
   const allServices = [...standardServices, ...knownSfpServices];
 
   try {
-    // Try with name filter first (best UX)
+    // Try with name/service filters first (best UX).
+    // Ubiquiti's own hardware advertises as "UACC-SFP-Wizard", which does not
+    // start with "SFP" - so match on the known service UUIDs too. A NotFoundError
+    // from requestDevice() is indistinguishable from a user cancelling the picker,
+    // so any device that only matches by name prefix here will never reach the
+    // acceptAllDevices fallback below - it has to match on the first attempt.
     const device = await bluetooth.requestDevice({
       filters: [
         { namePrefix: 'SFP' },
         { namePrefix: 'sfp' },
         { namePrefix: 'Sfp' },
+        { namePrefix: 'UACC-SFP' },
+        { services: [knownSfpServices[0]] },
+        { services: [knownSfpServices[1]] },
       ],
       optionalServices: allServices, // Allow service enumeration
     });

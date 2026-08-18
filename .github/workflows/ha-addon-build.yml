@@ -108,14 +108,28 @@ jobs:
             --tag "${VERSION}-pr" \
             --test
 
-      - name: Build and push add-on (main/develop)
-        if: github.event_name != 'pull_request' && github.event_name != 'release'
+      # Home Assistant Supervisor pulls the exact tag named by config.yaml's
+      # `version:` field - it has no notion of a "-ci" suffix or a "latest"
+      # float. So a push to main must publish under the plain config.yaml
+      # version, or every install from this repo 404s (see issues #118, #122).
+      - name: Build and push add-on (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          python3 homeassistant/build.py \
+            --arch ${{ matrix.arch }} \
+            --use-config-version \
+            --registry ghcr.io/${{ github.repository_owner }} \
+            --image sfpliberate-addon-{arch} \
+            --push
+
+      - name: Build and push add-on (develop)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           python3 homeassistant/build.py \
             --arch ${{ matrix.arch }} \
-            --tag "${VERSION}-ci" \
+            --tag "${VERSION}-dev" \
             --registry ghcr.io/${{ github.repository_owner }} \
             --image sfpliberate-addon-{arch} \
             --push

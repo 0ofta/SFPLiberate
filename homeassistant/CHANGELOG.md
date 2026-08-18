@@ -5,6 +5,19 @@ All notable changes to the SFPLiberate Home Assistant Add-On will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-08-18
+
+### Fixed
+- CI no longer publishes only a `-ci`-suffixed image tag on pushes to `main`;
+  it now publishes the plain version tag that Supervisor actually pulls
+  (config.yaml's `version:` had no matching published image, so every
+  install/update 404'd - see #118, #122)
+- Frontend build no longer fails on the non-existent `appwrite` `RealtimeSubscription`
+  type export, which broke `next build` for both the standalone Docker image
+  and this add-on (see #117)
+- Web Bluetooth device discovery no longer silently fails to find Ubiquiti's
+  own `UACC-SFP-Wizard` hardware, whose name doesn't start with `SFP` (see #122)
+
 ## [Unreleased]
 
 ### Added

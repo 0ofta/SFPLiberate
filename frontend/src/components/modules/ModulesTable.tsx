@@ -58,7 +58,9 @@ export function ModulesTable({ initialData }: ModulesTableProps) {
   // Realtime updates in Appwrite mode
   useEffect(() => {
     if (!isAppwrite()) return;
-    type RealtimeSubscription = import('appwrite').RealtimeSubscription;
+    // appwrite's `Realtime.subscribe()` resolves to { close: () => Promise<void> };
+    // this type isn't re-exported from the package root, so it's declared locally.
+    type RealtimeSubscription = { close: () => Promise<void> };
     let subscription: RealtimeSubscription | undefined;
     (async () => {
       try {
@@ -91,7 +93,7 @@ export function ModulesTable({ initialData }: ModulesTableProps) {
       }
     })();
     return () => {
-      try { subscription?.unsubscribe(); } catch {}
+      try { subscription?.close(); } catch {}
     };
   }, []);
 
