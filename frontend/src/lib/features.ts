@@ -124,6 +124,14 @@ export function isCommunityFeaturesEnabled(): boolean {
  * - Appwrite: Uses native Appwrite SDK (no API rewrites)
  */
 export function getApiUrl(): string {
+  // Server-side (SSR / Server Actions): Node's fetch can't resolve a relative
+  // URL, so target the running Next.js server itself and let its /api/*
+  // rewrite (next.config.ts) forward to the backend.
+  if (typeof window === 'undefined') {
+    const port = process.env.PORT || '3000';
+    const basePath = process.env.INGRESS_PATH || '';
+    return `http://127.0.0.1:${port}${basePath}/api`;
+  }
   return '/api';
 }
 

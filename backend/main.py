@@ -7,7 +7,6 @@ Appwrite Functions require a specific entrypoint structure. This wrapper:
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add the backend directory to Python path so 'app' module can be imported
@@ -16,7 +15,7 @@ if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
 # Now import the actual application
-from app.main import app
+from app.main import app  # noqa: E402
 
 # Export the FastAPI app as 'main' for Appwrite Functions
 # Appwrite's Python runtime will detect this as an ASGI app

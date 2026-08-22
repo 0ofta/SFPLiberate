@@ -47,6 +47,12 @@ const nextConfig: NextConfig = {
     // So standard builds can't run 'next start' - must use standalone
     output: 'standalone',
 
+    // Pin the workspace root explicitly so an unrelated lockfile in a parent
+    // directory (e.g. a monorepo checkout, or a stray lockfile above the repo)
+    // can't make Next.js infer the wrong root and nest .next/standalone output
+    // under the full relative path instead of at its expected top level.
+    outputFileTracingRoot: import.meta.dirname,
+
     env: {
         NEXT_PUBLIC_DEPLOYMENT_MODE: deploymentMode,
     },

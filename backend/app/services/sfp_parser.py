@@ -24,9 +24,9 @@ def parse_sfp_data(eeprom_data: bytes) -> dict[str, str]:
         }
 
     try:
-        vendor = eeprom_data[20:36].decode("ascii", errors="ignore").strip()
-        model = eeprom_data[40:56].decode("ascii", errors="ignore").strip()
-        serial = eeprom_data[68:84].decode("ascii", errors="ignore").strip()
+        vendor = eeprom_data[20:36].decode("ascii", errors="ignore").strip("\x00 ")
+        model = eeprom_data[40:56].decode("ascii", errors="ignore").strip("\x00 ")
+        serial = eeprom_data[68:84].decode("ascii", errors="ignore").strip("\x00 ")
 
         return {
             "vendor": vendor or "N/A",

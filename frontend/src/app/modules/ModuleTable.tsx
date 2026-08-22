@@ -24,10 +24,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { DeploymentMode } from '@/lib/features-client';
 import { writeSfpFromModuleId } from '@/lib/ble/manager';
 import { appwriteResourceIds } from '@/lib/appwrite/config';
-import { mapDocumentToModuleRow, type ModuleRow as Row } from './types';
+import { mapDocumentToModuleRow, type ModuleRow as Row, type ModuleRow } from './types';
 
 import { loadModulesAction } from './actions';
-import type { ModuleRow } from './types';
 
 type ModuleTableProps = {
   initialModules: ModuleRow[];
@@ -90,7 +89,9 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
       try {
         if (subscription?.unsubscribe) subscription.unsubscribe();
         else if (subscription?.close) subscription.close();
-      } catch {}
+      } catch {
+        // best-effort cleanup; ignore errors on unmount
+      }
     };
   }, [deploymentMode]);
 

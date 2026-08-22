@@ -93,7 +93,11 @@ export function ModulesTable({ initialData }: ModulesTableProps) {
       }
     })();
     return () => {
-      try { subscription?.close(); } catch {}
+      try {
+        subscription?.close();
+      } catch {
+        // best-effort cleanup; ignore errors on unmount
+      }
     };
   }, []);
 
