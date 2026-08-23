@@ -3,15 +3,15 @@
 # Get configuration from options.json
 export LOG_LEVEL=$(bashio::config 'log_level')
 export AUTO_DISCOVER=$(bashio::config 'auto_discover')
-export DEVICE_NAME_PATTERNS=$(bashio::config 'device_name_patterns' | jq -c '.')
+export DEVICE_NAME_PATTERNS=$(bashio::addon.config | jq -c '.device_name_patterns // ["SFP","Wizard"]')
 export CONNECTION_TIMEOUT=$(bashio::config 'connection_timeout')
 export DEVICE_EXPIRY_SECONDS=$(bashio::config 'device_expiry_seconds')
 export BLE_TRACE_LOGGING=$(bashio::config 'ble_trace_logging')
 export ENABLE_DEBUG_BLE=$(bashio::config 'enable_debug_ble')
 
 # Home Assistant API access
-export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN}"
-export HASSIO_TOKEN="${SUPERVISOR_TOKEN}"
+export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN:-}"
+export HASSIO_TOKEN="${SUPERVISOR_TOKEN:-}"
 export HA_API_URL="http://supervisor/core/api"
 export HA_WS_URL="ws://supervisor/core/websocket"
 
@@ -32,7 +32,7 @@ export ESPHOME_PROXY_MODE="false"  # We use HA Bluetooth API instead
 export HA_ADDON_MODE="true"
 
 # Configure ingress path for Next.js
-INGRESS_ENTRY=$(bashio::addon.ingress_entry)
+INGRESS_ENTRY=$(bashio::addon.ingress_entry || true)
 if [[ -n "${INGRESS_ENTRY}" && "${INGRESS_ENTRY}" != "/" ]]; then
     export INGRESS_PATH="${INGRESS_ENTRY}"
 else

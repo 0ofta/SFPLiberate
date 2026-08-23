@@ -6,15 +6,16 @@ ARG BUILD_VERSION=0.0.0
 # ============================================================================
 # Stage 1: Backend build
 # ============================================================================
-# Use build platform (not target) to avoid slow QEMU cross-compilation
-FROM --platform=$BUILDPLATFORM python:3.12-slim AS backend-build
+# Use build platform (not target) to avoid slow QEMU cross-compilation.
+# Must be musl-based (alpine) to match the final stage's Alpine runtime -
+# glibc-compiled wheels (e.g. pydantic_core's native extension) built on a
+# Debian-based image cannot load under Alpine's musl libc.
+FROM --platform=$BUILDPLATFORM python:3.12-alpine AS backend-build
 
 WORKDIR /backend
 
 # Install build dependencies for compiling Python packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache gcc musl-dev libffi-dev
 
 # Install Poetry
 RUN pip install --no-cache-dir poetry==1.8.5
@@ -85,11 +86,10 @@ COPY --from=frontend-build /frontend/.next/static /app/frontend/.next/static
 COPY --from=frontend-build /frontend/public /app/frontend/public
 
 # Copy add-on files (build context is repo root, so prefix with homeassistant/)
-COPY homeassistant/run.sh /
 COPY homeassistant/rootfs /
 
 # Make scripts executable
-RUN chmod +x /run.sh && \
+RUN chmod +x /etc/cont-init.d/run.sh && \
     chmod +x /etc/services.d/backend/run && \
     chmod +x /etc/services.d/frontend/run
 
@@ -120,5 +120,10 @@ LABEL \
     org.opencontainers.image.documentation="https://github.com/0ofta/SFPLiberate/blob/main/docs/HOME_ASSISTANT.md" \
     org.opencontainers.image.version="${BUILD_VERSION}"
 
-# Start via s6-overlay (base image handles this)
-CMD ["/run.sh"]
+# No CMD: the base image's own ENTRYPOINT (/init, s6-overlay) drives startup.
+# cont-init.d/run.sh runs once to set up shared env vars, then services.d/*
+# (backend, frontend) are supervised as the long-running daemons that keep
+# the container alive. Overriding CMD here would make s6-overlay treat that
+# script as a third parallel "legacy longrun" service - when it finishes and
+# exits (as a one-shot setup script always does), the whole services bundle
+# tears down, killing backend/frontend with it.

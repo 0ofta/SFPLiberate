@@ -42,8 +42,10 @@ DATABASE_BACKUP_INTERVAL=$(bashio::config 'database_backup_interval' '24')
 DATABASE_BACKUP_MAX_COUNT=$(bashio::config 'database_backup_max_count' '7')
 ENABLE_DEBUG_BLE=$(bashio::config 'enable_debug_ble' 'false')
 
-# Get device_name_patterns as array
-DEVICE_PATTERNS=$(bashio::config 'device_name_patterns')
+# Get device_name_patterns as array. bashio::config unrolls JSON arrays into
+# newline-separated raw elements (meant for shell iteration), not a JSON
+# array string, so query the raw options object directly instead.
+DEVICE_PATTERNS=$(bashio::addon.config | jq -c '.device_name_patterns // ["SFP","Wizard"]')
 
 # Export environment variables for backend
 export LOG_LEVEL
@@ -108,7 +110,7 @@ cd /app/backend || {
 
 # Supervisor token for Home Assistant API access
 if bashio::supervisor.ping; then
-  export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN}"
+  export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN:-}"
   bashio::log.info "Home Assistant Supervisor connection established"
 else
   bashio::log.warning "Could not connect to Home Assistant Supervisor"

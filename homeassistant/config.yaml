@@ -1,5 +1,5 @@
 name: "SFPLiberate"
-version: "0.2.1"
+version: "0.2.2"
 slug: "sfpliberate"
 description: "Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and manage SFP module EEPROM profiles"
 url: "https://github.com/0ofta/SFPLiberate"
@@ -68,3 +68,10 @@ schema:
   database_backup_max_count: int(1,30)
   enable_debug_ble: bool
   ble_trace_logging: bool
+
+# Image configuration - Supervisor pulls this pre-built multi-arch image
+# instead of building locally, since Supervisor's local build context is
+# scoped to this folder alone and can't reach the sibling backend/ and
+# frontend/ source trees this Dockerfile depends on. Built and pushed by
+# .github/workflows/ha-addon-build.yml on every push to main.
+image: "ghcr.io/0ofta/sfpliberate-addon-{arch}"
