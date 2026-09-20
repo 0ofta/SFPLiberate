@@ -20,6 +20,7 @@ class ModuleInfo(BaseModel):
     vendor: str | None
     model: str | None
     serial: str | None
+    sha256: str
     created_at: datetime
 
     class Config:
