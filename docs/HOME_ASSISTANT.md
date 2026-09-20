@@ -18,7 +18,7 @@ The SFPLiberate Home Assistant Add-On provides the easiest way to use SFPLiberat
 
 1. Click the button below:
 
-   [![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fjosiah-nelson%2FSFPLiberate)
+   [![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2F0ofta%2FSFPLiberate)
 
 2. Install the "SFPLiberate" add-on
 3. (Optional) Configure settings in the Configuration tab
@@ -32,7 +32,7 @@ If the button doesn't work:
 
 1. Go to **Settings** → **Add-ons** → **Add-on Store**
 2. Click the **⋮** menu → **Repositories**
-3. Add: `https://github.com/josiah-nelson/SFPLiberate`
+3. Add: `https://github.com/0ofta/SFPLiberate`
 4. Refresh the add-on store
 5. Find "SFPLiberate" and click **INSTALL**
 
@@ -424,9 +424,9 @@ The add-on communicates with:
 
 ## Support & Contributing
 
-- **Documentation:** [GitHub Docs](https://github.com/josiah-nelson/SFPLiberate/tree/main/docs)
-- **Issues:** [GitHub Issues](https://github.com/josiah-nelson/SFPLiberate/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/josiah-nelson/SFPLiberate/discussions)
+- **Documentation:** [GitHub Docs](https://github.com/0ofta/SFPLiberate/tree/main/docs)
+- **Issues:** [GitHub Issues](https://github.com/0ofta/SFPLiberate/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/0ofta/SFPLiberate/discussions)
 - **Add-on Plan:** [Implementation Plan](HOME_ASSISTANT_ADDON_PLAN.md)
 
 ## Version History

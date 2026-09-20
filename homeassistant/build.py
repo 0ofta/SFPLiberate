@@ -176,8 +176,8 @@ def main():
     )
     parser.add_argument(
         "--registry",
-        default="ghcr.io/josiah-nelson",
-        help="Docker registry (default: ghcr.io/josiah-nelson)",
+        default="ghcr.io/0ofta",
+        help="Docker registry (default: ghcr.io/0ofta)",
     )
     parser.add_argument(
         "--image",

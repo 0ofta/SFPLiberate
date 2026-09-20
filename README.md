@@ -13,7 +13,7 @@ SFPLiberate is a companion web application for the **Ubiquiti SFP Wizard (UACC-S
 
 ```bash
 # Clone the repository
-git clone https://github.com/josiah-nelson/SFPLiberate.git
+git clone https://github.com/0ofta/SFPLiberate.git
 cd SFPLiberate
 
 # Start the application
@@ -65,7 +65,7 @@ The Ubiquiti SFP Wizard is a powerful standalone device, but has limitations:
 
 **Easiest setup for Home Assistant users!**
 
-[![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fjosiah-nelson%2FSFPLiberate)
+[![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2F0ofta%2FSFPLiberate)
 
 - ✅ **One-click installation** - No Docker knowledge required
 - ✅ **Automatic Bluetooth discovery** - Leverages HA's Bluetooth integration

@@ -229,7 +229,7 @@ docker build -t sfpliberate-backend:dev -f Dockerfile.new .
 docker build \
   --build-arg PYTHON_VERSION=3.11 \
   --build-arg POETRY_VERSION=1.8.5 \
-  --cache-from type=registry,ref=ghcr.io/josiah-nelson/sfpliberate-backend:cache \
+  --cache-from type=registry,ref=ghcr.io/0ofta/sfpliberate-backend:cache \
   -t sfpliberate-backend:latest \
   -f Dockerfile.new .
 ```
@@ -339,4 +339,4 @@ For backend issues:
 1. Check logs: `docker-compose logs backend`
 2. Verify environment variables: `docker-compose config`
 3. Review [troubleshooting section](#troubleshooting)
-4. Open issue on [GitHub](https://github.com/josiah-nelson/SFPLiberate/issues)
+4. Open issue on [GitHub](https://github.com/0ofta/SFPLiberate/issues)

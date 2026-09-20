@@ -314,9 +314,9 @@ Coming soon - export/import feature will allow migration from standalone deploym
 
 ## Support & Contributing
 
-- **Documentation:** https://github.com/josiah-nelson/SFPLiberate/docs
-- **Issues:** https://github.com/josiah-nelson/SFPLiberate/issues
-- **Discussions:** https://github.com/josiah-nelson/SFPLiberate/discussions
+- **Documentation:** https://github.com/0ofta/SFPLiberate/docs
+- **Issues:** https://github.com/0ofta/SFPLiberate/issues
+- **Discussions:** https://github.com/0ofta/SFPLiberate/discussions
 
 ## Version History
 
