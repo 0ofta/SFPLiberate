@@ -704,10 +704,10 @@ npm run test:coverage   # Coverage report
 ## TODOs & Future Work
 
 ### Short Term (Pre-Alpha)
-- [ ] Fix Appwrite integration in new backend (repository layer routing)
-- [ ] Add integration tests for ESPHome proxy
-- [ ] Improve error handling in frontend BLE manager
-- [ ] Add frontend type safety checks (strict TypeScript)
+- [ ] Fix Appwrite integration in new backend (repository layer routing) — verified 2026-09-20: `backend/app/repositories/module_repository.py` is a plain SQLAlchemy repository with zero Appwrite awareness; there is no routing to fix yet, this is a from-scratch integration (needs an Appwrite Database client + a deployment-mode switch in the repository layer, and a real Appwrite instance to test against)
+- [ ] Add integration tests for ESPHome proxy — verified 2026-09-20: `backend/tests/` only covers `test_modules_api.py` and `test_sfp_parser.py`; `backend/app/services/esphome/` (mDNS discovery, RSSI proxy selection, WebSocket forwarding) has no test coverage at all
+- [ ] Improve error handling in frontend BLE manager — `frontend/src/lib/ble/manager.ts` already has 10 try/catch blocks across 624 lines; needs a real BLE device to identify which failure paths actually need improving rather than speculative changes
+- [x] Add frontend type safety checks (strict TypeScript) — done: `tsconfig.json` already has `"strict": true`, and `npx tsc --noEmit` passes with zero errors (verified 2026-09-20)
 
 ### Medium Term (Alpha)
 - [ ] Add Alembic for database migrations
