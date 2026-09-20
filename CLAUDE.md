@@ -480,7 +480,7 @@ DELETE /api/v1/modules/{id}          Delete module
 POST /api/v1/modules
 {
   "name": "Cisco GLC-SX-MMD",
-  "eeprom_data": "base64-encoded-binary-data..."
+  "eeprom_data_base64": "base64-encoded-binary-data..."
 }
 ```
 
