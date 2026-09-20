@@ -13,7 +13,7 @@ export type BleState = {
   logs: string[];
 };
 
-const state: BleState = {
+let state: BleState = {
   connected: false,
   connectionType: 'Not Connected',
   resolvedMode: 'none',
@@ -39,43 +39,42 @@ function emit() {
   listeners.forEach((l) => l());
 }
 
-export function setConnected(yes: boolean) {
-  state.connected = yes;
-  state.connectionType = yes ? state.connectionType : 'Not Connected';
+// Replaces `state` with a new object on every change (rather than mutating
+// fields in place) so useSyncExternalStore's Object.is snapshot comparison
+// actually detects the update and re-renders subscribed components.
+function update(patch: Partial<BleState>) {
+  state = { ...state, ...patch };
   emit();
+}
+
+export function setConnected(yes: boolean) {
+  update({ connected: yes, connectionType: yes ? state.connectionType : 'Not Connected' });
 }
 
 export function setConnectionType(text: BleState['connectionType']) {
-  state.connectionType = text;
-  emit();
+  update({ connectionType: text });
 }
 
 export function setResolvedMode(mode: ResolvedMode) {
-  state.resolvedMode = mode;
-  emit();
+  update({ resolvedMode: mode });
 }
 
 export function setDeviceVersion(v: string | null) {
-  state.deviceVersion = v;
-  emit();
+  update({ deviceVersion: v });
 }
 
 export function setSfpPresent(present: boolean | undefined) {
-  state.sfpPresent = present;
-  emit();
+  update({ sfpPresent: present });
 }
 
 export function setBattery(pct: number | undefined) {
-  state.batteryPct = pct;
-  emit();
+  update({ batteryPct: pct });
 }
 
 export function setRawEeprom(buf: ArrayBuffer | null) {
-  state.rawEepromData = buf;
-  emit();
+  update({ rawEepromData: buf });
 }
 
 export function log(line: string) {
-  state.logs = [`[${new Date().toLocaleTimeString()}] ${line}`, ...state.logs].slice(0, 500);
-  emit();
+  update({ logs: [`[${new Date().toLocaleTimeString()}] ${line}`, ...state.logs].slice(0, 500) });
 }
