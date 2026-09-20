@@ -277,10 +277,26 @@ docker-compose -f docker-compose.yml -f docker-compose.esphome.yml up
 
 ---
 
-## BLE Protocol (Firmware v1.0.10)
+## BLE Protocol
 
-**Service UUID:** `8E60F02E-F699-4865-B83F-F40501752184`
-**Write Characteristic:** `9280F26C-A56F-43EA-B769-D5D732E1AC67`
+**IMPORTANT:** There are two incompatible protocol generations. Firmware v1.0.10 speaks plain text; firmware v1.1.0+ speaks a binary "binme" envelope protocol. Sending one protocol's commands to the other firmware generation gets silently ignored - no error, no response, nothing. Read the device info characteristic (see below) to find out which one you're talking to before assuming either implementation applies.
+
+**Service UUID (both protocol generations):** `8E60F02E-F699-4865-B83F-F40501752184`
+**Write Characteristic (both):** `9280F26C-A56F-43EA-B769-D5D732E1AC67`
+
+### Firmware v1.1.0+ (binme binary protocol) - verified against real v1.1.3 hardware
+
+Implemented in `frontend/src/lib/ble/binme.ts` and `apiClient.ts`. Only wired up for the Direct Web Bluetooth connection path (`manager.ts`'s `connectDirectMode`) - the proxy and ESPHome-proxy paths still use the old plain-text protocol below and have not been updated or tested against v1.1.0+ firmware.
+
+- **Device Info Characteristic:** `DC272A22-43F2-416B-8FA5-63A071542FAC` - plain GATT read (no envelope), returns `{"id","fwv","apiVersion","voltage","level"}`. `id` is the device's own MAC (lowercase, no separators) and must be embedded in every API path.
+- **API Response Notify Characteristic:** `D587C47F-AC6E-4388-A31C-E6CD380BA043` - **not** DC272A22, despite that being the more obviously-named "notify" characteristic. DC272A22 is read-only device info; this is where actual API responses arrive.
+- **API paths:** `/api/1.0/<device-id>/<endpoint>`, e.g. `/api/1.0/1c6a1b7fb5a8/stats`.
+- **Wire format:** a JSON `{"type":"httpRequest","id":<uuid>,"timestamp":<ms>,"method":"GET"|"POST","path":...,"headers":{}}` request, wrapped in a binary envelope with a 4-byte transport header (length + sequence number) and zlib-compressed header/body sections. Full byte layout documented in `binme.ts`.
+- **Known endpoints:** `GET /stats` (battery/uptime/signal), `GET /xsfp/module/details` (module presence/vendor/part number), `GET /xsfp/module/start` + `GET /xsfp/module/data` (read EEPROM), `POST /xsfp/sync/start` + `POST /xsfp/sync/data` (write EEPROM - **verified for reads only**, write path implemented but untested against real hardware).
+- Reverse-engineered from the open-source [sfpw-tool](https://github.com/vitaminmoo/sfpw-tool) project, which documents and implements this protocol across firmware v1.0.10 through v1.1.3.
+
+### Firmware v1.0.10 (legacy plain-text protocol)
+
 **Notify Characteristic:** `DC272A22-43F2-416B-8FA5-63A071542FAC`
 
 **Discovered Endpoints:**
@@ -297,7 +313,7 @@ docker-compose -f docker-compose.yml -f docker-compose.esphome.yml up
 - Responses received via notify characteristic
 - SFF-8472 spec for EEPROM structure (vendor @ bytes 20-36, model @ 40-56, serial @ 68-84)
 
-See `docs/BLE_API_SPECIFICATION.md` for complete protocol documentation.
+See `docs/BLE_API_SPECIFICATION.md` for complete protocol documentation (v1.0.10 plain-text protocol only - not yet updated for the v1.1.0+ binme protocol).
 
 ---
 

@@ -25,6 +25,7 @@ export interface GattLikeCharacteristic {
   uuid: UUID;
   writeValue: (data: ArrayBufferLike | Uint8Array) => Promise<void>;
   writeValueWithoutResponse: (data: ArrayBufferLike | Uint8Array) => Promise<void>;
+  readValue?: () => Promise<DataView>;
   startNotifications: () => Promise<{ addEventListener?: (ev: 'characteristicvaluechanged', cb: (ev: { target: { value: DataView } }) => void) => void } | void>;
   addEventListener?: (ev: 'characteristicvaluechanged', cb: (ev: { target: { value: DataView } }) => void) => void;
 }

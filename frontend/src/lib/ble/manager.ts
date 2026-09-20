@@ -17,6 +17,7 @@ import { connectDirect, isWebBluetoothAvailable, startNotifications, writeChunks
 import { ESPHomeAdapter } from '@/lib/esphome/websocketAdapter';
 import { getModuleRepository } from '@/lib/repositories';
 import { calculateSHA256 } from '@/lib/sfp/parser';
+import { readDeviceInfo, getJson, fetchBinary, sendBinary, buildApiPath, handleApiNotification } from './apiClient';
 
 const TESTED_FIRMWARE_VERSION = '1.0.10';
 
@@ -129,6 +130,8 @@ export type ActiveConnection = {
   mode: ResolvedMode;
   write?: any;
   notify?: any;
+  apiNotify?: any;
+  deviceId?: string;
   proxy?: BLEProxyClient | null;
   esphomeAdapter?: ESPHomeAdapter | null;
 };
@@ -151,15 +154,32 @@ export async function connect(selected: ConnectionMode) {
   return connectDirectMode();
 }
 
+function handleApiNotificationEvent(event: { target: { value: DataView } }) {
+  const { value } = event.target;
+  const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+  handleApiNotification(bytes);
+}
+
 async function connectDirectMode() {
   logLine('Requesting BLE device...');
   const profile = requireProfile();
-  const { device, server, service, writeCharacteristic, notifyCharacteristic } = await connectDirect(profile, handleDisconnection);
-  active = { mode: 'direct', write: writeCharacteristic, notify: notifyCharacteristic, proxy: null };
-  await startNotifications(notifyCharacteristic, handleNotifications);
+  const { device, writeCharacteristic, deviceInfoCharacteristic, apiNotifyCharacteristic } = await connectDirect(profile, handleDisconnection);
+  active = { mode: 'direct', write: writeCharacteristic, apiNotify: apiNotifyCharacteristic, proxy: null };
+  await startNotifications(apiNotifyCharacteristic, handleApiNotificationEvent);
+
+  logLine('Reading device info...');
+  const info = await readDeviceInfo(deviceInfoCharacteristic);
+  active.deviceId = info.id;
+  setDeviceVersion(info.fwv);
+  if (info.fwv !== TESTED_FIRMWARE_VERSION) {
+    logLine(`Warning: App developed for firmware v${TESTED_FIRMWARE_VERSION}; device is v${info.fwv}.`);
+  }
+  const levelPct = info.level !== undefined ? parseInt(info.level, 10) : NaN;
+  if (!Number.isNaN(levelPct)) setBattery(levelPct);
+  logLine(`Connected to device ${info.id} (firmware v${info.fwv}, API v${info.apiVersion})`);
+
   setConnected(true);
   setConnectionType('Direct (Web Bluetooth)');
-  await getDeviceVersion();
   scheduleStatusMonitoring();
   return device;
 }
@@ -252,7 +272,33 @@ async function getDeviceVersion() {
   }
 }
 
+type DeviceStats = {
+  battery?: number;
+  batteryV?: number;
+  isLowBattery?: boolean;
+  uptime?: number;
+  signalDbm?: number;
+};
+
+type ModuleDetails = {
+  partNumber?: string;
+  vendor?: string;
+};
+
 async function requestDeviceStatus() {
+  if (active?.mode === 'direct' && active.deviceId) {
+    try {
+      const stats = await getJson<DeviceStats>(active.write, buildApiPath(active.deviceId, '/stats'));
+      if (stats?.battery !== undefined) setBattery(stats.battery);
+
+      const details = await getJson<ModuleDetails>(active.write, buildApiPath(active.deviceId, '/xsfp/module/details'));
+      setSfpPresent(Boolean(details && (details.partNumber || details.vendor)));
+    } catch (e) {
+      logLine(`Failed to get device status: ${String(e)}`);
+    }
+    return;
+  }
+
   try {
     await sendBleCommand('[GET] /stats');
   } catch (e) {
@@ -261,11 +307,25 @@ async function requestDeviceStatus() {
 }
 
 export async function requestSfpRead() {
+  if (active?.mode === 'direct' && active.deviceId) {
+    logLine('Reading SFP EEPROM...');
+    const buf = await fetchBinary(active.write, active.deviceId, '/xsfp/module/start', '/xsfp/module/data');
+    logLine(`Received ${buf.byteLength} bytes of binary SFP data.`);
+    setRawEeprom(buf);
+    return;
+  }
   await sendBleCommand('[POST] /sif/start');
 }
 
 export async function writeSfpFromBuffer(buf: ArrayBuffer) {
-  // Device protocol expects a write start command and then data (per legacy code)
+  if (active?.mode === 'direct' && active.deviceId) {
+    logLine(`Writing ${buf.byteLength} bytes to device...`);
+    await sendBinary(active.write, active.deviceId, '/xsfp/sync/start', '/xsfp/sync/data', new Uint8Array(buf));
+    logLine('Write request completed. This path writes to the device snapshot buffer - verified against real hardware for reads only; read the module back afterward to confirm the write actually took.');
+    return;
+  }
+
+  // Legacy plain-text protocol (proxy/ESPHome modes, or firmware v1.0.10)
   await sendBleCommand('[POST] /sif/write');
   const data = new Uint8Array(buf);
   if (!active) throw new Error('Not connected');
@@ -593,29 +653,32 @@ export async function writeSfpFromModuleId(moduleId: string) {
     
     logLine(`✓ Hash verified: ${actualHash.substring(0, 16)}...`);
 
-    // 4. Initiate write
-    await sendBleCommand('[POST] /sif/write');
-
-    // 5. Optional ack wait
-    try {
-      await waitForMessage('SIF write start', 5000);
-      logLine('Device ready to receive EEPROM data.');
-    } catch (e: any) {
-      logLine(`Warning: ${e?.message || String(e)}. Proceeding anyway...`);
-    }
-
-    // 6. Chunk write
-    await writeSfpFromBuffer(buf);
-
-    // 7. Completion ack
-    try {
-      await Promise.race([
-        waitForMessage('SIF write stop', 10000),
-        waitForMessage('SIF write complete', 10000),
-      ]);
+    if (active?.mode === 'direct' && active.deviceId) {
+      // New protocol: writeSfpFromBuffer's start/data POST sequence handles
+      // the whole request/response exchange itself - no separate ack wait needed.
+      await writeSfpFromBuffer(buf);
       logLine('Write operation completed.');
-    } catch (e: any) {
-      logLine(`Warning: ${e?.message || String(e)}. Write may have completed.`);
+    } else {
+      // Legacy plain-text protocol path (proxy/ESPHome modes, or firmware v1.0.10)
+      await sendBleCommand('[POST] /sif/write');
+      try {
+        await waitForMessage('SIF write start', 5000);
+        logLine('Device ready to receive EEPROM data.');
+      } catch (e: any) {
+        logLine(`Warning: ${e?.message || String(e)}. Proceeding anyway...`);
+      }
+
+      await writeSfpFromBuffer(buf);
+
+      try {
+        await Promise.race([
+          waitForMessage('SIF write stop', 10000),
+          waitForMessage('SIF write complete', 10000),
+        ]);
+        logLine('Write operation completed.');
+      } catch (e: any) {
+        logLine(`Warning: ${e?.message || String(e)}. Write may have completed.`);
+      }
     }
   } catch (error) {
     if (error instanceof APIError) throw error;

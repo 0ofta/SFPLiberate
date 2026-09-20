@@ -1,4 +1,5 @@
 import type { GattLikeCharacteristic, SfpProfile } from './types';
+import { SFP_DEVICE_INFO_CHAR_UUID, SFP_API_NOTIFY_CHAR_UUID } from './sfpProtocolConstants';
 
 const textEncoder = new TextEncoder();
 
@@ -75,7 +76,31 @@ export async function connectDirect(profile: SfpProfile, onDisconnect?: () => vo
     'Notify characteristic discovery'
   );
 
-  return { device, server, service, writeCharacteristic, notifyCharacteristic } as const;
+  // Fixed, well-known characteristics for the binme JSON API protocol
+  // (firmware v1.1.0+), independent of whatever notifyCharUuid a cached
+  // profile may hold - see docs/BLE_API_SPECIFICATION.md for why these are
+  // hardcoded rather than taken from the discovered/cached profile.
+  const deviceInfoCharacteristic: any = await withTimeout(
+    service.getCharacteristic(SFP_DEVICE_INFO_CHAR_UUID),
+    timeout,
+    'Device info characteristic discovery'
+  );
+
+  const apiNotifyCharacteristic: any = await withTimeout(
+    service.getCharacteristic(SFP_API_NOTIFY_CHAR_UUID),
+    timeout,
+    'API notify characteristic discovery'
+  );
+
+  return {
+    device,
+    server,
+    service,
+    writeCharacteristic,
+    notifyCharacteristic,
+    deviceInfoCharacteristic,
+    apiNotifyCharacteristic,
+  } as const;
 }
 
 export async function startNotifications(
