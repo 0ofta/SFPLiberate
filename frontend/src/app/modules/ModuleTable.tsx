@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { DeploymentMode } from '@/lib/features-client';
@@ -29,7 +30,7 @@ import { mapDocumentToModuleRow, type ModuleRow as Row, type ModuleRow } from '.
 import { getModuleRepository } from '@/lib/repositories';
 import { patchSerialNumber, patchVendor, patchModel } from '@/lib/sfp/parser';
 import { SfpDataViewer } from '@/components/sfp/SfpDataViewer';
-import { Pencil, Check, X, Trash2, Eye } from 'lucide-react';
+import { Pencil, Check, X, Trash2, Eye, HelpCircle } from 'lucide-react';
 
 import { loadModulesAction } from './actions';
 
@@ -38,6 +39,57 @@ type ModuleTableProps = {
   deploymentMode: DeploymentMode;
   initialError?: string | null;
 };
+
+function VendorModelHeader({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-1">
+      <span>{label}</span>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label={`Why ${label.toLowerCase()} writes might fail`}
+            className="text-blue-500 hover:text-blue-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 text-sm" onClick={(e) => e.stopPropagation()}>
+          <p className="mb-2">
+            Editing this field always works and is saved to your library. Writing the change to a physical device
+            only works on <strong>generic/unbranded &quot;donor&quot; modules</strong> - these typically have no
+            write-protection at all, which is the intended way to use this feature.
+          </p>
+          <p className="mb-2">
+            Branded modules from major vendors (Cisco, Ubiquiti, etc.) are commonly write-protected, and the SFP
+            Wizard&apos;s own firmware deliberately respects that protection for specific known modules - it will
+            reject the write with a &quot;locked by vendor&quot; message, and there is no way to override this.
+          </p>
+          <p>
+            <a
+              href="https://blog.ui.com/article/welcome-to-sfp-liberation-day"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              Ubiquiti&apos;s own explanation of this
+            </a>
+            {' · '}
+            <a
+              href="https://www.l-p.com/eu-en/blog/knowledge-center/sfp-eeprom-logic-for-multi-vendor-interoperability.htm"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              Technical background
+            </a>
+          </p>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
 
 export function ModuleTable({ initialModules, deploymentMode, initialError }: ModuleTableProps) {
   const [rows, setRows] = useState<ModuleRow[]>(initialModules);
@@ -301,12 +353,12 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
         },
       {
         accessorKey: 'vendor',
-        header: 'Vendor',
+        header: () => <VendorModelHeader label="Vendor" />,
         cell: ({ row }) => renderEditableEepromField(row.original.id, 'vendor', row.original.vendor),
       },
       {
         accessorKey: 'model',
-        header: 'Model',
+        header: () => <VendorModelHeader label="Model" />,
         cell: ({ row }) => renderEditableEepromField(row.original.id, 'model', row.original.model),
       },
       {
