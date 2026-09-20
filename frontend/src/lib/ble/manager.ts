@@ -722,7 +722,9 @@ export async function writeSfpFromModuleId(moduleId: string) {
       }
     }
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logLine(`Write failed: ${message}`);
     if (error instanceof APIError) throw error;
-    throw new APIError('Failed to write module', undefined, error);
+    throw new APIError(`Failed to write module: ${message}`, undefined, error);
   }
 }

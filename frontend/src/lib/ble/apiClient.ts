@@ -223,8 +223,11 @@ export async function sendBinary(
   data: Uint8Array,
 ): Promise<void> {
   await requireOk(
+    // 45s: when no SFP module is present, this endpoint appears to take much
+    // longer to respond than usual (still investigating why) rather than
+    // erroring out immediately - give it room before giving up.
     sendApiRequest(writeChar, 'POST', buildApiPath(deviceId, startEndpoint), new TextEncoder().encode(JSON.stringify({ size: data.length })), {
-      timeoutMs: 10000,
+      timeoutMs: 45000,
     }),
     `POST ${startEndpoint}`,
   );
