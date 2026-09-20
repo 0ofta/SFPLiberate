@@ -65,6 +65,163 @@ export function parseSFPData(eepromData: ArrayBuffer): SFPMetadata {
   }
 }
 
+/** Static identification fields decoded from the SFF-8472 A0h page (bytes 0-255). */
+export interface SFPIdentification {
+  vendor: string;
+  model: string;
+  serial: string;
+  revision: string;
+  dateCode: string | null;
+  connectorType: string;
+  nominalBitRateMbps: number | null;
+  wavelengthNm: number | null;
+  ddmSupported: boolean;
+  internallyCalibrated: boolean;
+}
+
+const CONNECTOR_TYPES: Record<number, string> = {
+  0x00: 'Unknown',
+  0x01: 'SC',
+  0x07: 'LC',
+  0x0b: 'MU',
+  0x0c: 'SG',
+  0x0d: 'Optical Pigtail',
+  0x20: 'HSSDC II',
+  0x21: 'Copper Pigtail',
+  0x22: 'RJ45',
+  0x23: 'No separable connector',
+};
+
+function parseDateCode(bytes: Uint8Array): string | null {
+  const decoder = new TextDecoder('ascii', { fatal: false });
+  const text = decoder.decode(bytes.slice(0, 6));
+  if (!/^\d{6}$/.test(text)) return null;
+  const yy = text.slice(0, 2);
+  const mm = text.slice(2, 4);
+  const dd = text.slice(4, 6);
+  return `20${yy}-${mm}-${dd}`;
+}
+
+/**
+ * Parse extended SFF-8472 identification fields beyond vendor/model/serial.
+ *
+ * @param eepromData - Raw EEPROM data as ArrayBuffer (at least 96 bytes)
+ */
+export function parseSFPIdentification(eepromData: ArrayBuffer): SFPIdentification {
+  const base = parseSFPData(eepromData);
+  const view = new Uint8Array(eepromData);
+  const decoder = new TextDecoder('ascii', { fatal: false });
+
+  const empty: SFPIdentification = {
+    ...base,
+    revision: 'N/A',
+    dateCode: null,
+    connectorType: 'Unknown',
+    nominalBitRateMbps: null,
+    wavelengthNm: null,
+    ddmSupported: false,
+    internallyCalibrated: false,
+  };
+
+  if (view.length < 96) return empty;
+
+  try {
+    const revision = decoder.decode(view.slice(56, 60)).trim() || 'N/A';
+    const dateCode = view.length >= 92 ? parseDateCode(view.slice(84, 92)) : null;
+    const connectorType = CONNECTOR_TYPES[view[2]] ?? `Unknown (0x${view[2].toString(16)})`;
+    const nominalBitRateMbps = view[12] > 0 ? view[12] * 100 : null;
+    // Wavelength (bytes 60-61) is only meaningful for optical transceivers;
+    // passive/active copper cables use this field differently, so a value of
+    // 0 (common for DAC cables) is reported as null rather than "0nm".
+    const wavelengthRaw = (view[60] << 8) | view[61];
+    const wavelengthNm = wavelengthRaw > 0 ? wavelengthRaw : null;
+
+    const dmt = view.length >= 93 ? view[92] : 0;
+    const ddmSupported = (dmt & 0x40) !== 0;
+    const internallyCalibrated = (dmt & 0x20) !== 0;
+
+    return {
+      ...base,
+      revision,
+      dateCode,
+      connectorType,
+      nominalBitRateMbps,
+      wavelengthNm,
+      ddmSupported,
+      internallyCalibrated,
+    };
+  } catch (error) {
+    console.error('Failed to parse SFP identification fields:', error);
+    return empty;
+  }
+}
+
+/** Live diagnostic monitoring readings decoded from the SFF-8472 A2h page. */
+export interface SFPDiagnostics {
+  temperatureC: number;
+  vccVolts: number;
+  txBiasMa: number;
+  txPowerMw: number;
+  txPowerDbm: number | null;
+  rxPowerMw: number;
+  rxPowerDbm: number | null;
+}
+
+function mwToDbm(mw: number): number | null {
+  return mw > 0 ? 10 * Math.log10(mw) : null;
+}
+
+/**
+ * Parse SFF-8472 Digital Diagnostics Monitoring (DDM) data - the same live
+ * readings (temperature, supply voltage, laser bias current, TX/RX optical
+ * power) shown on the SFP Wizard's own screen.
+ *
+ * Only supports internally-calibrated modules (the vast majority) - external
+ * calibration, which requires applying per-module slope/offset calibration
+ * constants from A2h bytes 0-55, is not implemented.
+ *
+ * Real-time diagnostics live at A2h offset 96-105 (i.e. EEPROM byte 352-361
+ * in a 512-byte A0h+A2h capture): temperature (signed, 1/256 degC), Vcc
+ * (100uV units), TX bias (2uA units), TX power (0.1uW units), RX power
+ * (0.1uW units). Verified against real captured hardware.
+ *
+ * @param eepromData - Raw EEPROM data as ArrayBuffer (must include the A2h
+ *   page, i.e. be at least 362 bytes - a 512-byte SFP capture has this)
+ * @returns Diagnostics, or null if the module doesn't support DDM or the
+ *   capture doesn't include the A2h page
+ */
+export function parseSFPDiagnostics(eepromData: ArrayBuffer): SFPDiagnostics | null {
+  const view = new Uint8Array(eepromData);
+  if (view.length < 362) return null;
+
+  const dmt = view.length >= 93 ? view[92] : 0;
+  const ddmSupported = (dmt & 0x40) !== 0;
+  const internallyCalibrated = (dmt & 0x20) !== 0;
+  if (!ddmSupported || !internallyCalibrated) return null;
+
+  const dataView = new DataView(eepromData);
+  const a2 = 256; // A2h page start offset within a combined A0h+A2h capture
+
+  const tempRaw = dataView.getInt16(a2 + 96);
+  const vccRaw = dataView.getUint16(a2 + 98);
+  const biasRaw = dataView.getUint16(a2 + 100);
+  const txPowerRaw = dataView.getUint16(a2 + 102);
+  const rxPowerRaw = dataView.getUint16(a2 + 104);
+
+  const txPowerMw = txPowerRaw * 0.0001;
+  const rxPowerMw = rxPowerRaw * 0.0001;
+
+  return {
+    temperatureC: tempRaw / 256,
+    vccVolts: vccRaw * 0.0001,
+    txBiasMa: biasRaw * 0.002,
+    txPowerMw,
+    txPowerDbm: mwToDbm(txPowerMw),
+    rxPowerMw,
+    rxPowerDbm: mwToDbm(rxPowerMw),
+  };
+}
+
 /**
  * Patches the serial number field (bytes 68-83) of an SFP EEPROM image.
  *

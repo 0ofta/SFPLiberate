@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -27,7 +28,8 @@ import { appwriteResourceIds } from '@/lib/appwrite/config';
 import { mapDocumentToModuleRow, type ModuleRow as Row, type ModuleRow } from './types';
 import { getModuleRepository } from '@/lib/repositories';
 import { patchSerialNumber } from '@/lib/sfp/parser';
-import { Pencil, Check, X } from 'lucide-react';
+import { SfpDataViewer } from '@/components/sfp/SfpDataViewer';
+import { Pencil, Check, X, Trash2, Eye } from 'lucide-react';
 
 import { loadModulesAction } from './actions';
 
@@ -44,6 +46,10 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
   const [editingSerialId, setEditingSerialId] = useState<string | null>(null);
   const [serialDraft, setSerialDraft] = useState('');
   const [savingSerialId, setSavingSerialId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
+  const [viewingData, setViewingData] = useState<ArrayBuffer | null>(null);
+  const [viewingLoading, setViewingLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'id', desc: true }]);
   const [pageSize, setPageSize] = useState(10);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -149,6 +155,36 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
     }
   }, []);
 
+  const onDelete = useCallback(async (id: string) => {
+    setDeletingId(id);
+    try {
+      await getModuleRepository().deleteModule(id);
+      setRows((prev) => prev.filter((r) => r.id !== id));
+      toast.success('Module deleted');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete module.';
+      toast.error(message);
+    } finally {
+      setDeletingId(null);
+    }
+  }, []);
+
+  const onView = useCallback(async (id: string) => {
+    setViewingId(id);
+    setViewingLoading(true);
+    setViewingData(null);
+    try {
+      const data = await getModuleRepository().getEEPROMData(id);
+      setViewingData(data);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load module data.';
+      toast.error(message);
+      setViewingId(null);
+    } finally {
+      setViewingLoading(false);
+    }
+  }, []);
+
     const filtered = useMemo(() => {
       if (!query) {
 
@@ -243,33 +279,65 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button size="sm" variant="default">
-                Write
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Write module #{row.original.id} to device?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Writing EEPROM can permanently damage your module if incorrect data is used. Make sure you have a backup and the
-                  correct profile is selected. This only stages the data on the device - you must then confirm on the SFP Wizard&apos;s
-                  own screen to actually apply it to the module.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onWrite(row.original.id)}>
+          <div className="flex items-center gap-1">
+            <Button size="sm" variant="ghost" onClick={() => onView(row.original.id)} aria-label={`View data for module ${row.original.id}`}>
+              <Eye className="h-4 w-4" />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="default">
                   Write
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Write module #{row.original.id} to device?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Writing EEPROM can permanently damage your module if incorrect data is used. Make sure you have a backup and the
+                    correct profile is selected. This only stages the data on the device - you must then confirm on the SFP Wizard&apos;s
+                    own screen to actually apply it to the module.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onWrite(row.original.id)}>
+                    Write
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={deletingId === row.original.id}
+                  aria-label={`Delete module ${row.original.id}`}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete module #{row.original.id}?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This permanently removes the saved EEPROM capture from your local library. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onDelete(row.original.id)} className="bg-red-600 hover:bg-red-700">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         ),
       },
     ],
-    [onWrite, editingSerialId, serialDraft, savingSerialId, onSaveSerial]
+    [onWrite, onDelete, onView, deletingId, editingSerialId, serialDraft, savingSerialId, onSaveSerial]
   );
 
   const table = useReactTable({
@@ -415,6 +483,15 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={viewingId !== null} onOpenChange={(open) => !open && setViewingId(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Module #{viewingId} data</DialogTitle>
+          </DialogHeader>
+          <SfpDataViewer eepromData={viewingData} loading={viewingLoading} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

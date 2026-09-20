@@ -17,6 +17,9 @@ import { isIOS, isSafari, isWebBluetoothAvailable } from '@/lib/ble/webbluetooth
 import { toast } from 'sonner';
 import { detectBluetoothSupport } from '@/lib/ble/support';
 import { isStandalone } from '@/lib/features-client';
+import { getModuleRepository } from '@/lib/repositories';
+import { SfpDataViewer } from '@/components/sfp/SfpDataViewer';
+import { Trash2 } from 'lucide-react';
 
 // Server snapshot that returns stable initial state
 const getServerSnapshot = () => ({
@@ -41,6 +44,7 @@ export function ConnectPanel() {
   const [proxyAddr, setProxyAddr] = useState('');
   const [support, setSupport] = useState<{ summary: string; reasons: string[] } | null>(null);
   const [esphomeEnabled, setEsphomeEnabled] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadModules = async () => {
@@ -158,6 +162,20 @@ export function ConnectPanel() {
     }
   };
 
+  const onDeleteModule = async (id: string) => {
+    if (!window.confirm(`Delete module #${id}? This cannot be undone.`)) return;
+    setDeletingId(id);
+    try {
+      await getModuleRepository().deleteModule(id);
+      setModules((prev) => prev.filter((m) => m.id !== id));
+      toast.success('Module deleted');
+    } catch (e: any) {
+      toast.error(e?.message || String(e));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const onSaveProfile = () => {
     try {
       if (!svc || !wrt || !ntf) throw new Error('All UUIDs are required');
@@ -235,7 +253,7 @@ export function ConnectPanel() {
           Read SFP
         </Button>
         <Button onClick={onSave} disabled={!state.rawEepromData || busy} id="saveModuleButton" variant="outline">
-          Save Module
+          + Local Modules
         </Button>
       </div>
       <div style={{ display: 'flex', gap: 16 }}>
@@ -253,9 +271,19 @@ export function ConnectPanel() {
                 <div>
                   #{m.id} {m.vendor} {m.model} {m.serial}
                 </div>
-                <div className="ml-3">
+                <div className="ml-3 flex items-center gap-1">
                   <Button onClick={() => onWriteModule(m.id)} disabled={busy || !state.connected} size="sm">
                     Write
+                  </Button>
+                  <Button
+                    onClick={() => onDeleteModule(m.id)}
+                    disabled={deletingId === m.id}
+                    size="sm"
+                    variant="ghost"
+                    aria-label={`Delete module ${m.id}`}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </li>
@@ -263,6 +291,15 @@ export function ConnectPanel() {
           </ul>
         </div>
       </div>
+      {state.rawEepromData && (
+        <div>
+          <strong>SFP Data</strong>
+          <p className="mb-2 text-xs text-neutral-500">
+            Data captured from the last read. Click &quot;+ Local Modules&quot; above to save it to your library.
+          </p>
+          <SfpDataViewer eepromData={state.rawEepromData} />
+        </div>
+      )}
       {(mode === 'web-bluetooth' || mode === 'auto') && (
         <div>
           <strong>Direct Discovery</strong>
