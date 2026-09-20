@@ -38,6 +38,12 @@ class ModuleRepository:
         await self.session.refresh(module)
         return module
 
+    async def update(self, module: SFPModule) -> SFPModule:
+        """Persist changes to an already-tracked module instance."""
+        await self.session.flush()
+        await self.session.refresh(module)
+        return module
+
     async def delete(self, module_id: int) -> bool:
         """Delete module by ID. Returns True if deleted, False if not found."""
         module = await self.get_by_id(module_id)

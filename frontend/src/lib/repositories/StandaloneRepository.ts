@@ -159,6 +159,46 @@ export class StandaloneRepository implements ModuleRepository {
   }
 
   /**
+   * Replace a module's EEPROM data (full replacement)
+   */
+  async updateModuleEeprom(id: string, eepromData: ArrayBuffer): Promise<Module> {
+    try {
+      const eepromBase64 = arrayBufferToBase64(eepromData);
+
+      const response = await fetch(`${this.baseUrl}/v1/modules/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ eeprom_data_base64: eepromBase64 }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Module with ID ${id} not found`);
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const item = await response.json();
+      return {
+        id: String(item.id),
+        name: item.name,
+        vendor: item.vendor || undefined,
+        model: item.model || undefined,
+        serial: item.serial || undefined,
+        sha256: item.sha256 || undefined,
+        size: item.size || undefined,
+        created_at: item.created_at,
+      };
+    } catch (error) {
+      console.error(`Failed to update module ${id}:`, error);
+      throw new Error(`Failed to update module: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
    * Delete a module
    */
   async deleteModule(id: string): Promise<void> {

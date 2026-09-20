@@ -59,6 +59,35 @@ class ModuleService:
         """Get module by ID."""
         return await self.repository.get_by_id(module_id)
 
+    async def update_module_eeprom(self, module_id: int, eeprom_data: bytes) -> SFPModule | None:
+        """
+        Replace a module's EEPROM data, re-parsing vendor/model/serial and
+        recomputing its SHA-256 checksum.
+
+        Returns None if the module doesn't exist. Raises ValueError if the new
+        EEPROM data's checksum collides with a different existing module
+        (sha256 has a unique constraint).
+        """
+        module = await self.repository.get_by_id(module_id)
+        if not module:
+            return None
+
+        sha256 = hashlib.sha256(eeprom_data).hexdigest()
+        existing = await self.repository.get_by_sha256(sha256)
+        if existing and existing.id != module_id:
+            raise ValueError(
+                f"This EEPROM content is identical to module #{existing.id} (SHA-256 collision)."
+            )
+
+        parsed = parse_sfp_data(eeprom_data)
+        module.eeprom_data = eeprom_data
+        module.sha256 = sha256
+        module.vendor = parsed["vendor"]
+        module.model = parsed["model"]
+        module.serial = parsed["serial"]
+
+        return await self.repository.update(module)
+
     async def get_module_eeprom(self, module_id: int) -> bytes | None:
         """Get raw EEPROM data for a module."""
         module = await self.repository.get_by_id(module_id)

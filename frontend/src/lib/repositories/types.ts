@@ -135,6 +135,17 @@ export interface ModuleRepository {
   deleteModule(id: string): Promise<void>;
 
   /**
+   * Replace a module's EEPROM data (full replacement). Re-parses
+   * vendor/model/serial and recomputes the SHA-256 hash server-side.
+   *
+   * @param id - Module ID
+   * @param eepromData - New raw EEPROM binary data
+   * @returns Updated module metadata
+   * @throws Error if module not found or update fails
+   */
+  updateModuleEeprom?(id: string, eepromData: ArrayBuffer): Promise<Module>;
+
+  /**
    * Save a community module as a favorite (Appwrite only)
    *
    * @param communityModuleId - Community module ID

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.schemas.module import ModuleCreate, ModuleInfo, StatusMessage
+from app.schemas.module import ModuleCreate, ModuleInfo, ModuleUpdate, StatusMessage
 from app.services.module_service import ModuleService
 
 router = APIRouter()
@@ -64,6 +64,38 @@ async def create_module(
         ),
         id=created_module.id,
     )
+
+
+@router.put("/modules/{module_id}", response_model=ModuleInfo)
+async def update_module(
+    module_id: int, module: ModuleUpdate, db: AsyncSession = Depends(get_db)
+) -> ModuleInfo:
+    """
+    Replace a module's EEPROM data (full replacement).
+
+    Re-parses vendor/model/serial from the new data and recomputes the
+    SHA-256 checksum. Used for editing a saved module (e.g. testing a write
+    with a deliberately different serial number) before writing it to a
+    device.
+    """
+    try:
+        eeprom_data = base64.b64decode(module.eeprom_data_base64)
+    except Exception as e:
+        logger.warning("invalid_base64_data", error=str(e))
+        raise HTTPException(status_code=400, detail="Invalid Base64 data") from e
+
+    service = ModuleService(db)
+    try:
+        updated_module = await service.update_module_eeprom(module_id, eeprom_data)
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+
+    if not updated_module:
+        logger.warning("module_not_found", module_id=module_id)
+        raise HTTPException(status_code=404, detail="Module not found")
+
+    logger.info("module_updated", module_id=module_id, sha256=updated_module.sha256[:16] + "...")
+    return updated_module
 
 
 @router.get("/modules/{module_id}/eeprom")

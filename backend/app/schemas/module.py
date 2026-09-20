@@ -12,6 +12,12 @@ class ModuleCreate(BaseModel):
     eeprom_data_base64: str = Field(..., description="Base64-encoded EEPROM data")
 
 
+class ModuleUpdate(BaseModel):
+    """Schema for updating an existing module's EEPROM data."""
+
+    eeprom_data_base64: str = Field(..., description="Base64-encoded EEPROM data (full replacement)")
+
+
 class ModuleInfo(BaseModel):
     """Schema for module information (without BLOB data)."""
 

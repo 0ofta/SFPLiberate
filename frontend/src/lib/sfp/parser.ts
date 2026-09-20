@@ -66,6 +66,36 @@ export function parseSFPData(eepromData: ArrayBuffer): SFPMetadata {
 }
 
 /**
+ * Patches the serial number field (bytes 68-83) of an SFP EEPROM image.
+ *
+ * Values longer than 16 ASCII characters are truncated; shorter values are
+ * space-padded to fill the field, matching how parseSFPData() strips
+ * trailing spaces/nulls on read. This field falls after SFF-8472's CC_BASE
+ * checksum (byte 63, covers bytes 0-62) and before CC_EXT (byte 95, covers
+ * bytes 84-94), so patching it does not require recomputing either checksum.
+ *
+ * @param eepromData - Raw EEPROM data as ArrayBuffer (must be at least 84 bytes)
+ * @param newSerial - New serial number (ASCII, max 16 characters)
+ * @returns A new ArrayBuffer with the serial field replaced
+ */
+export function patchSerialNumber(eepromData: ArrayBuffer, newSerial: string): ArrayBuffer {
+  if (eepromData.byteLength < 84) {
+    throw new Error(`EEPROM data too short to contain a serial number field (${eepromData.byteLength} bytes, need at least 84)`);
+  }
+
+  const patched = eepromData.slice(0);
+  const view = new Uint8Array(patched);
+  const encoder = new TextEncoder();
+  const serialBytes = encoder.encode(newSerial.slice(0, 16));
+
+  const field = new Uint8Array(16).fill(0x20); // space-padded per SFF-8472 convention
+  field.set(serialBytes.slice(0, 16));
+  view.set(field, 68);
+
+  return patched;
+}
+
+/**
  * Calculate SHA-256 hash of EEPROM data
  *
  * Used for duplicate detection - same EEPROM content = same hash.

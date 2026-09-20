@@ -25,6 +25,9 @@ import type { DeploymentMode } from '@/lib/features-client';
 import { writeSfpFromModuleId } from '@/lib/ble/manager';
 import { appwriteResourceIds } from '@/lib/appwrite/config';
 import { mapDocumentToModuleRow, type ModuleRow as Row, type ModuleRow } from './types';
+import { getModuleRepository } from '@/lib/repositories';
+import { patchSerialNumber } from '@/lib/sfp/parser';
+import { Pencil, Check, X } from 'lucide-react';
 
 import { loadModulesAction } from './actions';
 
@@ -38,6 +41,9 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
   const [rows, setRows] = useState<ModuleRow[]>(initialModules);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
+  const [editingSerialId, setEditingSerialId] = useState<string | null>(null);
+  const [serialDraft, setSerialDraft] = useState('');
+  const [savingSerialId, setSavingSerialId] = useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'id', desc: true }]);
   const [pageSize, setPageSize] = useState(10);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -109,6 +115,28 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
     }
   }, []);
 
+  const onSaveSerial = useCallback(async (id: string) => {
+    const repository = getModuleRepository();
+    if (!repository.updateModuleEeprom) {
+      toast.error('Editing modules is not supported in this deployment mode.');
+      return;
+    }
+    setSavingSerialId(id);
+    try {
+      const current = await repository.getEEPROMData(id);
+      const patched = patchSerialNumber(current, serialDraft);
+      const updated = await repository.updateModuleEeprom(id, patched);
+      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, serial: updated.serial, vendor: updated.vendor, model: updated.model } : r)));
+      setEditingSerialId(null);
+      toast.success('Serial number updated', { description: 'Write it to the device to test.' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update serial number.';
+      toast.error(message);
+    } finally {
+      setSavingSerialId(null);
+    }
+  }, [serialDraft]);
+
   const onWrite = useCallback(async (id: string) => {
     try {
       toast('Starting write...', { description: `Module #${id}` });
@@ -148,7 +176,69 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
         },
       { accessorKey: 'vendor', header: 'Vendor' },
       { accessorKey: 'model', header: 'Model' },
-      { accessorKey: 'serial', header: 'Serial' },
+      {
+        accessorKey: 'serial',
+        header: 'Serial',
+        cell: ({ row }) => {
+          const id = row.original.id;
+          const isEditing = editingSerialId === id;
+          const isSaving = savingSerialId === id;
+
+          if (!isEditing) {
+            return (
+              <div className="flex items-center gap-1.5">
+                <span>{row.original.serial}</span>
+                <button
+                  type="button"
+                  aria-label={`Edit serial number for module ${id}`}
+                  className="text-neutral-400 hover:text-neutral-700"
+                  onClick={() => {
+                    setEditingSerialId(id);
+                    setSerialDraft(row.original.serial ?? '');
+                  }}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <div className="flex items-center gap-1.5">
+              <Input
+                autoFocus
+                value={serialDraft}
+                maxLength={16}
+                disabled={isSaving}
+                onChange={(e) => setSerialDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onSaveSerial(id);
+                  if (e.key === 'Escape') setEditingSerialId(null);
+                }}
+                className="h-7 w-36"
+              />
+              <button
+                type="button"
+                aria-label="Save serial number"
+                disabled={isSaving}
+                className="text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
+                onClick={() => onSaveSerial(id)}
+              >
+                <Check className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                aria-label="Cancel editing serial number"
+                disabled={isSaving}
+                className="text-neutral-400 hover:text-neutral-700 disabled:opacity-50"
+                onClick={() => setEditingSerialId(null)}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          );
+        },
+      },
       {
         id: 'actions',
         header: 'Actions',
@@ -178,7 +268,7 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
         ),
       },
     ],
-    [onWrite]
+    [onWrite, editingSerialId, serialDraft, savingSerialId, onSaveSerial]
   );
 
   const table = useReactTable({
