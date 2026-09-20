@@ -27,6 +27,9 @@ export interface Module {
   /** SHA-256 hash of EEPROM data (for duplicate detection) */
   sha256?: string;
 
+  /** Free-text user notes, stored only in the app (not written to the EEPROM) */
+  comments?: string;
+
   /** EEPROM data size in bytes */
   size?: number;
 
@@ -144,6 +147,17 @@ export interface ModuleRepository {
    * @throws Error if module not found or update fails
    */
   updateModuleEeprom?(id: string, eepromData: ArrayBuffer): Promise<Module>;
+
+  /**
+   * Update a module's app-only metadata (currently just comments) without
+   * touching its EEPROM data.
+   *
+   * @param id - Module ID
+   * @param metadata - Fields to update
+   * @returns Updated module metadata
+   * @throws Error if module not found or update fails
+   */
+  updateModuleMetadata?(id: string, metadata: { comments?: string }): Promise<Module>;
 
   /**
    * Save a community module as a favorite (Appwrite only)

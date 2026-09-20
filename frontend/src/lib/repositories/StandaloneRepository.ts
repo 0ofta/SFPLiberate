@@ -25,6 +25,21 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
+/** Maps a backend module JSON object to the frontend Module type. */
+function mapToModule(item: any): Module {
+  return {
+    id: String(item.id),
+    name: item.name,
+    vendor: item.vendor || undefined,
+    model: item.model || undefined,
+    serial: item.serial || undefined,
+    sha256: item.sha256 || undefined,
+    comments: item.comments || undefined,
+    size: item.size || undefined,
+    created_at: item.created_at,
+  };
+}
+
 /**
  * Standalone repository using FastAPI REST API
  */
@@ -51,18 +66,7 @@ export class StandaloneRepository implements ModuleRepository {
       }
 
       const data = await response.json();
-
-      // Convert backend format to Module type
-      return data.map((item: any) => ({
-        id: String(item.id),
-        name: item.name,
-        vendor: item.vendor || undefined,
-        model: item.model || undefined,
-        serial: item.serial || undefined,
-        sha256: item.sha256 || undefined,
-        size: item.size || undefined,
-        created_at: item.created_at,
-      }));
+      return data.map(mapToModule);
     } catch (error) {
       console.error('Failed to list modules:', error);
       throw new Error(`Failed to fetch modules: ${error instanceof Error ? error.message : String(error)}`);
@@ -181,19 +185,37 @@ export class StandaloneRepository implements ModuleRepository {
         throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const item = await response.json();
-      return {
-        id: String(item.id),
-        name: item.name,
-        vendor: item.vendor || undefined,
-        model: item.model || undefined,
-        serial: item.serial || undefined,
-        sha256: item.sha256 || undefined,
-        size: item.size || undefined,
-        created_at: item.created_at,
-      };
+      return mapToModule(await response.json());
     } catch (error) {
       console.error(`Failed to update module ${id}:`, error);
+      throw new Error(`Failed to update module: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Update a module's app-only metadata (currently just comments)
+   */
+  async updateModuleMetadata(id: string, metadata: { comments?: string }): Promise<Module> {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/modules/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(metadata),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Module with ID ${id} not found`);
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return mapToModule(await response.json());
+    } catch (error) {
+      console.error(`Failed to update module metadata ${id}:`, error);
       throw new Error(`Failed to update module: ${error instanceof Error ? error.message : String(error)}`);
     }
   }

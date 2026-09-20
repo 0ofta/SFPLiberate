@@ -27,7 +27,7 @@ import { writeSfpFromModuleId } from '@/lib/ble/manager';
 import { appwriteResourceIds } from '@/lib/appwrite/config';
 import { mapDocumentToModuleRow, type ModuleRow as Row, type ModuleRow } from './types';
 import { getModuleRepository } from '@/lib/repositories';
-import { patchSerialNumber } from '@/lib/sfp/parser';
+import { patchSerialNumber, patchVendor, patchModel } from '@/lib/sfp/parser';
 import { SfpDataViewer } from '@/components/sfp/SfpDataViewer';
 import { Pencil, Check, X, Trash2, Eye } from 'lucide-react';
 
@@ -43,9 +43,13 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
   const [rows, setRows] = useState<ModuleRow[]>(initialModules);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
-  const [editingSerialId, setEditingSerialId] = useState<string | null>(null);
-  const [serialDraft, setSerialDraft] = useState('');
-  const [savingSerialId, setSavingSerialId] = useState<string | null>(null);
+  type EeepromField = 'vendor' | 'model' | 'serial';
+  const [editingField, setEditingField] = useState<{ id: string; field: EeepromField } | null>(null);
+  const [fieldDraft, setFieldDraft] = useState('');
+  const [savingField, setSavingField] = useState<{ id: string; field: EeepromField } | null>(null);
+  const [editingCommentsId, setEditingCommentsId] = useState<string | null>(null);
+  const [commentsDraft, setCommentsDraft] = useState('');
+  const [savingCommentsId, setSavingCommentsId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [viewingData, setViewingData] = useState<ArrayBuffer | null>(null);
@@ -121,27 +125,53 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
     }
   }, []);
 
-  const onSaveSerial = useCallback(async (id: string) => {
+  const FIELD_PATCHERS: Record<EeepromField, (data: ArrayBuffer, value: string) => ArrayBuffer> = {
+    vendor: patchVendor,
+    model: patchModel,
+    serial: patchSerialNumber,
+  };
+
+  const onSaveField = useCallback(async (id: string, field: EeepromField) => {
     const repository = getModuleRepository();
     if (!repository.updateModuleEeprom) {
       toast.error('Editing modules is not supported in this deployment mode.');
       return;
     }
-    setSavingSerialId(id);
+    setSavingField({ id, field });
     try {
       const current = await repository.getEEPROMData(id);
-      const patched = patchSerialNumber(current, serialDraft);
+      const patched = FIELD_PATCHERS[field](current, fieldDraft);
       const updated = await repository.updateModuleEeprom(id, patched);
       setRows((prev) => prev.map((r) => (r.id === id ? { ...r, serial: updated.serial, vendor: updated.vendor, model: updated.model } : r)));
-      setEditingSerialId(null);
-      toast.success('Serial number updated', { description: 'Write it to the device to test.' });
+      setEditingField(null);
+      toast.success(`${field[0].toUpperCase()}${field.slice(1)} updated`, { description: 'Write it to the device to test.' });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update serial number.';
+      const message = error instanceof Error ? error.message : `Failed to update ${field}.`;
       toast.error(message);
     } finally {
-      setSavingSerialId(null);
+      setSavingField(null);
     }
-  }, [serialDraft]);
+  }, [fieldDraft]);
+
+  const onSaveComments = useCallback(async (id: string) => {
+    const repository = getModuleRepository();
+    if (!repository.updateModuleMetadata) {
+      toast.error('Editing modules is not supported in this deployment mode.');
+      return;
+    }
+    setSavingCommentsId(id);
+    try {
+      const updated = await repository.updateModuleMetadata(id, { comments: commentsDraft });
+      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, comments: updated.comments } : r)));
+      setEditingCommentsId(null);
+      toast.success('Comment saved');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save comment.';
+      toast.error(message);
+    } finally {
+      setSavingCommentsId(null);
+    }
+  }, [commentsDraft]);
 
   const onWrite = useCallback(async (id: string) => {
     try {
@@ -193,11 +223,70 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
       const q = query.toLowerCase();
 
       return rows.filter((module) =>
-        [module.id, module.vendor, module.model, module.serial]
+        [module.id, module.vendor, module.model, module.serial, module.comments]
           .filter(Boolean)
           .some((value) => value!.toString().toLowerCase().includes(q))
       );
   }, [query, rows]);
+
+  const renderEditableEepromField = (id: string, field: EeepromField, value: string | undefined) => {
+    const isEditing = editingField?.id === id && editingField.field === field;
+    const isSaving = savingField?.id === id && savingField.field === field;
+
+    if (!isEditing) {
+      return (
+        <div className="flex items-center gap-1.5">
+          <span>{value}</span>
+          <button
+            type="button"
+            aria-label={`Edit ${field} for module ${id}`}
+            className="text-neutral-400 hover:text-neutral-700"
+            onClick={() => {
+              setEditingField({ id, field });
+              setFieldDraft(value ?? '');
+            }}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-1.5">
+        <Input
+          autoFocus
+          value={fieldDraft}
+          maxLength={16}
+          disabled={isSaving}
+          onChange={(e) => setFieldDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSaveField(id, field);
+            if (e.key === 'Escape') setEditingField(null);
+          }}
+          className="h-7 w-36"
+        />
+        <button
+          type="button"
+          aria-label={`Save ${field}`}
+          disabled={isSaving}
+          className="text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
+          onClick={() => onSaveField(id, field)}
+        >
+          <Check className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          aria-label={`Cancel editing ${field}`}
+          disabled={isSaving}
+          className="text-neutral-400 hover:text-neutral-700 disabled:opacity-50"
+          onClick={() => setEditingField(null)}
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  };
 
   const columns = useMemo<ColumnDef<ModuleRow>[]>(
     () => [
@@ -210,27 +299,40 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
             return id.length > 10 ? `#${id.substring(0, 8)}...` : `#${id}`;
           },
         },
-      { accessorKey: 'vendor', header: 'Vendor' },
-      { accessorKey: 'model', header: 'Model' },
+      {
+        accessorKey: 'vendor',
+        header: 'Vendor',
+        cell: ({ row }) => renderEditableEepromField(row.original.id, 'vendor', row.original.vendor),
+      },
+      {
+        accessorKey: 'model',
+        header: 'Model',
+        cell: ({ row }) => renderEditableEepromField(row.original.id, 'model', row.original.model),
+      },
       {
         accessorKey: 'serial',
         header: 'Serial',
+        cell: ({ row }) => renderEditableEepromField(row.original.id, 'serial', row.original.serial),
+      },
+      {
+        accessorKey: 'comments',
+        header: 'Comments',
         cell: ({ row }) => {
           const id = row.original.id;
-          const isEditing = editingSerialId === id;
-          const isSaving = savingSerialId === id;
+          const isEditing = editingCommentsId === id;
+          const isSaving = savingCommentsId === id;
 
           if (!isEditing) {
             return (
               <div className="flex items-center gap-1.5">
-                <span>{row.original.serial}</span>
+                <span className="text-neutral-500">{row.original.comments || '—'}</span>
                 <button
                   type="button"
-                  aria-label={`Edit serial number for module ${id}`}
+                  aria-label={`Edit comment for module ${id}`}
                   className="text-neutral-400 hover:text-neutral-700"
                   onClick={() => {
-                    setEditingSerialId(id);
-                    setSerialDraft(row.original.serial ?? '');
+                    setEditingCommentsId(id);
+                    setCommentsDraft(row.original.comments ?? '');
                   }}
                 >
                   <Pencil className="h-3.5 w-3.5" />
@@ -243,31 +345,31 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
             <div className="flex items-center gap-1.5">
               <Input
                 autoFocus
-                value={serialDraft}
-                maxLength={16}
+                value={commentsDraft}
+                maxLength={1000}
                 disabled={isSaving}
-                onChange={(e) => setSerialDraft(e.target.value)}
+                onChange={(e) => setCommentsDraft(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') onSaveSerial(id);
-                  if (e.key === 'Escape') setEditingSerialId(null);
+                  if (e.key === 'Enter') onSaveComments(id);
+                  if (e.key === 'Escape') setEditingCommentsId(null);
                 }}
-                className="h-7 w-36"
+                className="h-7 w-48"
               />
               <button
                 type="button"
-                aria-label="Save serial number"
+                aria-label="Save comment"
                 disabled={isSaving}
                 className="text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
-                onClick={() => onSaveSerial(id)}
+                onClick={() => onSaveComments(id)}
               >
                 <Check className="h-4 w-4" />
               </button>
               <button
                 type="button"
-                aria-label="Cancel editing serial number"
+                aria-label="Cancel editing comment"
                 disabled={isSaving}
                 className="text-neutral-400 hover:text-neutral-700 disabled:opacity-50"
-                onClick={() => setEditingSerialId(null)}
+                onClick={() => setEditingCommentsId(null)}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -337,7 +439,7 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
         ),
       },
     ],
-    [onWrite, onDelete, onView, deletingId, editingSerialId, serialDraft, savingSerialId, onSaveSerial]
+    [onWrite, onDelete, onView, deletingId, editingField, fieldDraft, savingField, onSaveField, editingCommentsId, commentsDraft, savingCommentsId, onSaveComments]
   );
 
   const table = useReactTable({
@@ -412,6 +514,14 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
                     onCheckedChange={() => table.getColumn('serial')?.toggleVisibility()}
                   />
                   <label htmlFor="col-serial">Serial</label>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Checkbox
+                    id="col-comments"
+                    checked={table.getColumn('comments')?.getIsVisible() ?? true}
+                    onCheckedChange={() => table.getColumn('comments')?.toggleVisibility()}
+                  />
+                  <label htmlFor="col-comments">Comments</label>
                 </div>
               </div>
               <Select value={String(pageSize)} onValueChange={(value) => setPageSize(Number(value))}>

@@ -24,6 +24,7 @@ class SFPModule(Base):
     serial: Mapped[str | None] = mapped_column(String(100))
     eeprom_data: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     sha256: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    comments: Mapped[str | None] = mapped_column(String(1000))
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     __table_args__ = (Index("idx_vendor_model", "vendor", "model"),)

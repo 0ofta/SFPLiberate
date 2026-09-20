@@ -75,9 +75,15 @@ export interface SFPIdentification {
   connectorType: string;
   nominalBitRateMbps: number | null;
   wavelengthNm: number | null;
+  /** Optical frequency derived from wavelength (c / lambda), null for copper/DAC or when wavelength is unknown. */
+  frequencyTHz: number | null;
+  /** Supported link distances, one entry per non-zero SFF-8472 length field (a module typically reports only one). */
+  linkLengths: { media: string; distance: string }[];
   ddmSupported: boolean;
   internallyCalibrated: boolean;
 }
+
+const SPEED_OF_LIGHT_KM_PER_S = 299792.458; // km/s, used to convert wavelength (nm) to frequency (THz)
 
 const CONNECTOR_TYPES: Record<number, string> = {
   0x00: 'Unknown',
@@ -119,6 +125,8 @@ export function parseSFPIdentification(eepromData: ArrayBuffer): SFPIdentificati
     connectorType: 'Unknown',
     nominalBitRateMbps: null,
     wavelengthNm: null,
+    frequencyTHz: null,
+    linkLengths: [],
     ddmSupported: false,
     internallyCalibrated: false,
   };
@@ -135,6 +143,17 @@ export function parseSFPIdentification(eepromData: ArrayBuffer): SFPIdentificati
     // 0 (common for DAC cables) is reported as null rather than "0nm".
     const wavelengthRaw = (view[60] << 8) | view[61];
     const wavelengthNm = wavelengthRaw > 0 ? wavelengthRaw : null;
+    const frequencyTHz = wavelengthNm ? SPEED_OF_LIGHT_KM_PER_S / wavelengthNm : null;
+
+    // SFF-8472 link length fields (bytes 14-19). A module typically reports
+    // a nonzero value in only one or two of these, matching its media type.
+    const linkLengths: { media: string; distance: string }[] = [];
+    if (view[14] > 0) linkLengths.push({ media: 'Single-mode fiber', distance: `${view[14]} km` });
+    if (view[15] > 0) linkLengths.push({ media: 'Single-mode fiber (fine)', distance: `${view[15] * 100} m` });
+    if (view[16] > 0) linkLengths.push({ media: 'OM2 (50µm MMF)', distance: `${view[16] * 10} m` });
+    if (view[17] > 0) linkLengths.push({ media: 'OM1 (62.5µm MMF)', distance: `${view[17] * 10} m` });
+    if (view[18] > 0) linkLengths.push({ media: 'OM3 (50µm MMF)', distance: `${view[18] * 10} m` });
+    if (view[19] > 0) linkLengths.push({ media: 'Copper / active cable', distance: `${view[19]} m` });
 
     const dmt = view.length >= 93 ? view[92] : 0;
     const ddmSupported = (dmt & 0x40) !== 0;
@@ -147,6 +166,8 @@ export function parseSFPIdentification(eepromData: ArrayBuffer): SFPIdentificati
       connectorType,
       nominalBitRateMbps,
       wavelengthNm,
+      frequencyTHz,
+      linkLengths,
       ddmSupported,
       internallyCalibrated,
     };
@@ -223,33 +244,79 @@ export function parseSFPDiagnostics(eepromData: ArrayBuffer): SFPDiagnostics | n
 }
 
 /**
+ * Writes an ASCII value into a fixed-width field of an SFP EEPROM image,
+ * space-padded/truncated to fit. Does not touch any checksum - callers
+ * patching a field covered by SFF-8472's CC_BASE checksum (bytes 0-62) must
+ * recompute it separately with recomputeCcBaseChecksum().
+ */
+function patchAsciiField(eepromData: ArrayBuffer, offset: number, length: number, value: string): ArrayBuffer {
+  if (eepromData.byteLength < offset + length) {
+    throw new Error(`EEPROM data too short for field at offset ${offset} (${eepromData.byteLength} bytes, need at least ${offset + length})`);
+  }
+
+  const patched = eepromData.slice(0);
+  const view = new Uint8Array(patched);
+  const encoder = new TextEncoder();
+  const valueBytes = encoder.encode(value.slice(0, length));
+
+  const field = new Uint8Array(length).fill(0x20); // space-padded per SFF-8472 convention
+  field.set(valueBytes.slice(0, length));
+  view.set(field, offset);
+
+  return patched;
+}
+
+/**
+ * Recomputes SFF-8472's CC_BASE checksum (byte 63 = sum of bytes 0-62, mod
+ * 256). Required after patching any field within that range (e.g. vendor,
+ * model) - firmware may reject or flag EEPROM data whose checksum doesn't
+ * match its contents.
+ */
+function recomputeCcBaseChecksum(eepromData: ArrayBuffer): ArrayBuffer {
+  if (eepromData.byteLength < 64) return eepromData.slice(0);
+  const patched = eepromData.slice(0);
+  const view = new Uint8Array(patched);
+  let sum = 0;
+  for (let i = 0; i < 63; i++) sum += view[i];
+  view[63] = sum & 0xff;
+  return patched;
+}
+
+/**
  * Patches the serial number field (bytes 68-83) of an SFP EEPROM image.
  *
- * Values longer than 16 ASCII characters are truncated; shorter values are
- * space-padded to fill the field, matching how parseSFPData() strips
- * trailing spaces/nulls on read. This field falls after SFF-8472's CC_BASE
- * checksum (byte 63, covers bytes 0-62) and before CC_EXT (byte 95, covers
- * bytes 84-94), so patching it does not require recomputing either checksum.
+ * This field falls after SFF-8472's CC_BASE checksum (byte 63, covers bytes
+ * 0-62) and before CC_EXT (byte 95, covers bytes 84-94), so patching it does
+ * not require recomputing either checksum.
  *
  * @param eepromData - Raw EEPROM data as ArrayBuffer (must be at least 84 bytes)
  * @param newSerial - New serial number (ASCII, max 16 characters)
  * @returns A new ArrayBuffer with the serial field replaced
  */
 export function patchSerialNumber(eepromData: ArrayBuffer, newSerial: string): ArrayBuffer {
-  if (eepromData.byteLength < 84) {
-    throw new Error(`EEPROM data too short to contain a serial number field (${eepromData.byteLength} bytes, need at least 84)`);
-  }
+  return patchAsciiField(eepromData, 68, 16, newSerial);
+}
 
-  const patched = eepromData.slice(0);
-  const view = new Uint8Array(patched);
-  const encoder = new TextEncoder();
-  const serialBytes = encoder.encode(newSerial.slice(0, 16));
+/**
+ * Patches the vendor name field (bytes 20-35). Falls within CC_BASE's
+ * checksummed range, so the checksum (byte 63) is recomputed automatically.
+ *
+ * @param eepromData - Raw EEPROM data as ArrayBuffer (must be at least 64 bytes)
+ * @param newVendor - New vendor name (ASCII, max 16 characters)
+ */
+export function patchVendor(eepromData: ArrayBuffer, newVendor: string): ArrayBuffer {
+  return recomputeCcBaseChecksum(patchAsciiField(eepromData, 20, 16, newVendor));
+}
 
-  const field = new Uint8Array(16).fill(0x20); // space-padded per SFF-8472 convention
-  field.set(serialBytes.slice(0, 16));
-  view.set(field, 68);
-
-  return patched;
+/**
+ * Patches the model/part number field (bytes 40-55). Falls within CC_BASE's
+ * checksummed range, so the checksum (byte 63) is recomputed automatically.
+ *
+ * @param eepromData - Raw EEPROM data as ArrayBuffer (must be at least 64 bytes)
+ * @param newModel - New model/part number (ASCII, max 16 characters)
+ */
+export function patchModel(eepromData: ArrayBuffer, newModel: string): ArrayBuffer {
+  return recomputeCcBaseChecksum(patchAsciiField(eepromData, 40, 16, newModel));
 }
 
 /**

@@ -56,8 +56,14 @@ export function SfpDataViewer({ eepromData, loading, emptyMessage }: SfpDataView
           <Field label="Date Code" value={id.dateCode} />
           <Separator className="my-2" />
           <Field label="Connector" value={id.connectorType} />
-          <Field label="Nominal Bit Rate" value={id.nominalBitRateMbps ? `${id.nominalBitRateMbps} Mbps` : null} />
+          <Field label="Speed" value={id.nominalBitRateMbps ? `${id.nominalBitRateMbps} Mbps` : null} />
           <Field label="Wavelength" value={id.wavelengthNm ? `${id.wavelengthNm} nm` : null} />
+          <Field label="Frequency" value={id.frequencyTHz ? `${id.frequencyTHz.toFixed(2)} THz` : null} />
+          {id.linkLengths.length > 0 ? (
+            id.linkLengths.map((l) => <Field key={l.media} label={`Distance (${l.media})`} value={l.distance} />)
+          ) : (
+            <Field label="Distance" value={null} />
+          )}
         </div>
       </div>
 

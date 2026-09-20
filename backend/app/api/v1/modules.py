@@ -71,22 +71,26 @@ async def update_module(
     module_id: int, module: ModuleUpdate, db: AsyncSession = Depends(get_db)
 ) -> ModuleInfo:
     """
-    Replace a module's EEPROM data (full replacement).
+    Update a module. Only the fields actually provided in the request are changed.
 
-    Re-parses vendor/model/serial from the new data and recomputes the
-    SHA-256 checksum. Used for editing a saved module (e.g. testing a write
-    with a deliberately different serial number) before writing it to a
-    device.
+    eeprom_data_base64 (if given) fully replaces the EEPROM, re-parsing
+    vendor/model/serial and recomputing the SHA-256 checksum - used for
+    editing a saved module (e.g. testing a write with a deliberately
+    different serial number) before writing it to a device. comments (if
+    given) is a free-text note stored only in the app, independent of the
+    EEPROM content.
     """
-    try:
-        eeprom_data = base64.b64decode(module.eeprom_data_base64)
-    except Exception as e:
-        logger.warning("invalid_base64_data", error=str(e))
-        raise HTTPException(status_code=400, detail="Invalid Base64 data") from e
+    eeprom_data: bytes | None = None
+    if module.eeprom_data_base64 is not None:
+        try:
+            eeprom_data = base64.b64decode(module.eeprom_data_base64)
+        except Exception as e:
+            logger.warning("invalid_base64_data", error=str(e))
+            raise HTTPException(status_code=400, detail="Invalid Base64 data") from e
 
     service = ModuleService(db)
     try:
-        updated_module = await service.update_module_eeprom(module_id, eeprom_data)
+        updated_module = await service.update_module(module_id, eeprom_data=eeprom_data, comments=module.comments)
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e)) from e
 

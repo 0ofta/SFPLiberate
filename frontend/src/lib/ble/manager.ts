@@ -16,7 +16,7 @@ import type { ConnectionMode, ResolvedMode, SfpProfile } from './types';
 import { connectDirect, isWebBluetoothAvailable, startNotifications, writeChunks, writeText } from './webbluetooth';
 import { ESPHomeAdapter } from '@/lib/esphome/websocketAdapter';
 import { getModuleRepository } from '@/lib/repositories';
-import { calculateSHA256 } from '@/lib/sfp/parser';
+import { calculateSHA256, parseSFPIdentification } from '@/lib/sfp/parser';
 import { readDeviceInfo, getJson, fetchBinary, sendBinary, buildApiPath, handleApiNotification } from './apiClient';
 
 const TESTED_FIRMWARE_VERSION = '1.0.10';
@@ -94,6 +94,10 @@ export function handleDisconnection() {
     statusMonitoringId = null;
   }
 
+  // Re-announce whatever module is inserted on the next connection, even if
+  // it's the same one that was already there.
+  lastSfpPresent = undefined;
+
   // Clear all pending message listeners
   listeners.forEach(l => {
     clearTimeout(l.timeoutId);
@@ -138,6 +142,8 @@ export type ActiveConnection = {
 
 let active: ActiveConnection | null = null;
 let statusMonitoringId: ReturnType<typeof setInterval> | null = null;
+let lastSfpPresent: boolean | undefined;
+let autoDetectInProgress = false;
 type MsgListener = { pattern: string | RegExp; resolve: (text: string) => void; reject: (e: any) => void; timeoutId: any };
 const listeners: MsgListener[] = [];
 
@@ -292,7 +298,13 @@ async function requestDeviceStatus() {
       if (stats?.battery !== undefined) setBattery(stats.battery);
 
       const details = await getJson<ModuleDetails>(active.write, buildApiPath(active.deviceId, '/xsfp/module/details'));
-      setSfpPresent(Boolean(details && (details.partNumber || details.vendor)));
+      const present = Boolean(details && (details.partNumber || details.vendor));
+      setSfpPresent(present);
+
+      if (present && !lastSfpPresent) {
+        void announceDetectedModule();
+      }
+      lastSfpPresent = present;
     } catch (e) {
       logLine(`Failed to get device status: ${String(e)}`);
     }
@@ -303,6 +315,35 @@ async function requestDeviceStatus() {
     await sendBleCommand('[GET] /stats');
   } catch (e) {
     logLine(`Failed to get device status: ${String(e)}`);
+  }
+}
+
+/**
+ * Fires when a module transitions from absent to present, mirroring the
+ * confirmation the SFP Wizard's own screen shows on insertion. Does a full
+ * EEPROM read (safe/non-destructive) to surface vendor/model plus the
+ * "vital info" a physical device would show: speed, wavelength/frequency,
+ * and supported link distance. Does not save anything to the library -
+ * that still requires an explicit "+ Local Modules" click.
+ */
+async function announceDetectedModule() {
+  if (autoDetectInProgress || active?.mode !== 'direct' || !active.deviceId) return;
+  autoDetectInProgress = true;
+  try {
+    logLine('Module detected - reading identification data...');
+    const buf = await fetchBinary(active.write, active.deviceId, '/xsfp/module/start', '/xsfp/module/data');
+    setRawEeprom(buf);
+    const id = parseSFPIdentification(buf);
+    const details = [
+      id.nominalBitRateMbps ? `${id.nominalBitRateMbps} Mbps` : null,
+      id.wavelengthNm ? `${id.wavelengthNm} nm (${id.frequencyTHz?.toFixed(2)} THz)` : null,
+      id.linkLengths.length > 0 ? id.linkLengths.map((l) => `${l.media} ${l.distance}`).join(', ') : null,
+    ].filter(Boolean);
+    logLine(`Module confirmed: ${id.vendor} ${id.model} (S/N ${id.serial})${details.length ? ' — ' + details.join(' · ') : ''}`);
+  } catch (e) {
+    logLine(`Module detected, but reading full details failed: ${String(e)}`);
+  } finally {
+    autoDetectInProgress = false;
   }
 }
 

@@ -59,12 +59,21 @@ class ModuleService:
         """Get module by ID."""
         return await self.repository.get_by_id(module_id)
 
-    async def update_module_eeprom(self, module_id: int, eeprom_data: bytes) -> SFPModule | None:
+    async def update_module(
+        self,
+        module_id: int,
+        eeprom_data: bytes | None = None,
+        comments: str | None = None,
+    ) -> SFPModule | None:
         """
-        Replace a module's EEPROM data, re-parsing vendor/model/serial and
-        recomputing its SHA-256 checksum.
+        Update a module. Only the fields actually provided are changed.
 
-        Returns None if the module doesn't exist. Raises ValueError if the new
+        eeprom_data (if given) fully replaces the EEPROM, re-parsing
+        vendor/model/serial and recomputing the SHA-256 checksum. comments
+        (if given) is a free-text, app-only note - it does not touch the
+        EEPROM data at all.
+
+        Returns None if the module doesn't exist. Raises ValueError if new
         EEPROM data's checksum collides with a different existing module
         (sha256 has a unique constraint).
         """
@@ -72,19 +81,23 @@ class ModuleService:
         if not module:
             return None
 
-        sha256 = hashlib.sha256(eeprom_data).hexdigest()
-        existing = await self.repository.get_by_sha256(sha256)
-        if existing and existing.id != module_id:
-            raise ValueError(
-                f"This EEPROM content is identical to module #{existing.id} (SHA-256 collision)."
-            )
+        if eeprom_data is not None:
+            sha256 = hashlib.sha256(eeprom_data).hexdigest()
+            existing = await self.repository.get_by_sha256(sha256)
+            if existing and existing.id != module_id:
+                raise ValueError(
+                    f"This EEPROM content is identical to module #{existing.id} (SHA-256 collision)."
+                )
 
-        parsed = parse_sfp_data(eeprom_data)
-        module.eeprom_data = eeprom_data
-        module.sha256 = sha256
-        module.vendor = parsed["vendor"]
-        module.model = parsed["model"]
-        module.serial = parsed["serial"]
+            parsed = parse_sfp_data(eeprom_data)
+            module.eeprom_data = eeprom_data
+            module.sha256 = sha256
+            module.vendor = parsed["vendor"]
+            module.model = parsed["model"]
+            module.serial = parsed["serial"]
+
+        if comments is not None:
+            module.comments = comments
 
         return await self.repository.update(module)
 

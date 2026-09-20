@@ -6,6 +6,7 @@ export interface ModuleRow {
   vendor?: string;
   model?: string;
   serial?: string;
+  comments?: string;
   size?: number;
   createdAt?: string;
 }
@@ -18,6 +19,7 @@ export function mapRepositoryModule(module: Module): ModuleRow {
     vendor: module.vendor ?? undefined,
     model: module.model ?? undefined,
     serial: module.serial ?? undefined,
+    comments: module.comments ?? undefined,
     size: module.size ?? undefined,
     createdAt: module.created_at,
   };
