@@ -141,7 +141,7 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
     try {
       toast('Starting write...', { description: `Module #${id}` });
       await writeSfpFromModuleId(id);
-      toast.success('Write flow completed', { description: 'Consider reading back to verify' });
+      toast.success('Staged to device - confirm on the SFP Wizard screen', { description: 'The module is not written until you approve the snapshot on the device itself.' });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to write module to device.';
@@ -254,7 +254,8 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
                 <AlertDialogTitle>Write module #{row.original.id} to device?</AlertDialogTitle>
                 <AlertDialogDescription>
                   Writing EEPROM can permanently damage your module if incorrect data is used. Make sure you have a backup and the
-                  correct profile is selected.
+                  correct profile is selected. This only stages the data on the device - you must then confirm on the SFP Wizard&apos;s
+                  own screen to actually apply it to the module.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

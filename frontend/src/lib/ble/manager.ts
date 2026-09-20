@@ -319,9 +319,9 @@ export async function requestSfpRead() {
 
 export async function writeSfpFromBuffer(buf: ArrayBuffer) {
   if (active?.mode === 'direct' && active.deviceId) {
-    logLine(`Writing ${buf.byteLength} bytes to device...`);
+    logLine(`Writing ${buf.byteLength} bytes to device snapshot buffer...`);
     await sendBinary(active.write, active.deviceId, '/xsfp/sync/start', '/xsfp/sync/data', new Uint8Array(buf));
-    logLine('Write request completed. This path writes to the device snapshot buffer - verified against real hardware for reads only; read the module back afterward to confirm the write actually took.');
+    logLine('Data staged to device snapshot buffer. This does NOT write to the module yet - go to the SFP Wizard\'s own screen and confirm applying the snapshot. There is no BLE command to do this remotely; it is a physical safety confirmation required by the device firmware.');
     return;
   }
 
@@ -656,8 +656,8 @@ export async function writeSfpFromModuleId(moduleId: string) {
     if (active?.mode === 'direct' && active.deviceId) {
       // New protocol: writeSfpFromBuffer's start/data POST sequence handles
       // the whole request/response exchange itself - no separate ack wait needed.
+      // Its own log line already explains the required on-device confirmation step.
       await writeSfpFromBuffer(buf);
-      logLine('Write operation completed.');
     } else {
       // Legacy plain-text protocol path (proxy/ESPHome modes, or firmware v1.0.10)
       await sendBleCommand('[POST] /sif/write');

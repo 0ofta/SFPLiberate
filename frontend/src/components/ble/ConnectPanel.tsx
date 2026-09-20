@@ -143,13 +143,14 @@ export function ConnectPanel() {
         '✓ Ensure you have backed up the original module data\n' +
         '✓ Verify this is the correct module profile\n' +
         '✓ Use test/non-critical modules first\n\n' +
+        'NOTE: This only stages the data on the device - you must then confirm on the SFP Wizard\'s own screen to actually apply it to the module.\n\n' +
         'Do you want to continue?'
     );
     if (!confirmed) return;
     try {
       setBusy(true);
       await writeSfpFromModuleId(id);
-      toast.success('Write completed', { description: 'Consider reading back to verify' });
+      toast.success('Staged to device - confirm on the SFP Wizard screen', { description: 'The module is not written until you approve the snapshot on the device itself.' });
     } catch (e: any) {
       toast.error(e?.message || String(e));
     } finally {
