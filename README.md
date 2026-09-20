@@ -434,4 +434,10 @@ This project is an independent, community-driven effort and is **not affiliated 
 
 ---
 
+## Project History
+
+SFPLiberate was originally created by [Josiah Nelson](https://github.com/josiah-nelson) in November 2025, who reverse-engineered the SFP Wizard's undocumented BLE protocol (service/characteristic UUIDs, command set, and write-chunking behavior) against real hardware — the hardest and most valuable part of this project — and built out the original application around it. The original repository went dormant, and several core features (persistent module storage in standalone mode, and the Home Assistant add-on) turned out to be broken at the time development stopped. This fork picks the project back up: those issues are fixed, and development continues here as SFPLiberate's way forward.
+
+---
+
 **Built with ❤️ by the SFPLiberate community**
