@@ -43,8 +43,10 @@ WORKDIR /frontend
 # Copy package files
 COPY frontend/package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (dev deps included: the build needs TypeScript,
+# Tailwind and @next/bundle-analyzer; only the standalone output below
+# is copied into the final image)
+RUN npm ci
 
 # Copy frontend source
 COPY frontend/ ./
