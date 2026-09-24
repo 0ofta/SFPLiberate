@@ -215,3 +215,41 @@ def test_advertisement_with_integer_address_is_tracked_by_mac_string() -> None:
     assert device is not None
     assert device.name == "SFP-Wizard"
     assert service.device_manager.select_best_proxy(MAC) == "proxy"
+
+
+async def test_proxy_connection_passes_encryption_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import get_settings
+    from app.services.esphome import proxy_manager as pm
+    from app.services.esphome.schemas import ESPHomeProxy
+
+    settings = get_settings()
+    monkeypatch.setattr(
+        settings, "esphome_proxy_encryption_key", "c2VjcmV0LWtleS0zMi1ieXRlcy1sb25nLi4uLi4uLi4="
+    )
+    client_cls = create_autospec(APIClient)
+    monkeypatch.setattr(pm, "APIClient", client_cls)
+
+    manager = pm.ProxyManager()
+    proxy = ESPHomeProxy(name="proxy", address="192.168.1.50", port=6053, connected=False)
+    await manager.connect_proxy("proxy", proxy)
+
+    kwargs = client_cls.call_args.kwargs
+    assert kwargs["noise_psk"] == "c2VjcmV0LWtleS0zMi1ieXRlcy1sb25nLi4uLi4uLi4="
+    assert kwargs["address"] == "192.168.1.50"
+    assert proxy.connected is True
+
+
+async def test_proxy_connection_without_key_is_unencrypted(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import get_settings
+    from app.services.esphome import proxy_manager as pm
+    from app.services.esphome.schemas import ESPHomeProxy
+
+    monkeypatch.setattr(get_settings(), "esphome_proxy_encryption_key", None)
+    client_cls = create_autospec(APIClient)
+    monkeypatch.setattr(pm, "APIClient", client_cls)
+
+    await pm.ProxyManager().connect_proxy(
+        "proxy", ESPHomeProxy(name="proxy", address="192.168.1.50", port=6053, connected=False)
+    )
+
+    assert client_cls.call_args.kwargs["noise_psk"] is None

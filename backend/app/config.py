@@ -48,6 +48,8 @@ class Settings(BaseSettings):
     esphome_proxy_port: int = 6053
     esphome_proxy_name: str | None = None
     esphome_proxy_password: str = ""  # ESPHome API password (empty = no auth)
+    # ESPHome API encryption key (the `api: encryption: key:` base64 value); None = unencrypted
+    esphome_proxy_encryption_key: str | None = None
     # Timing configuration
     esphome_sse_interval: int = 1  # SSE device stream update interval (seconds)
     esphome_device_expiry: int = 30  # Device expiry timeout (seconds)
