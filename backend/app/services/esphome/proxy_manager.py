@@ -136,6 +136,7 @@ class ProxyManager:
                 address=proxy.address,
                 port=proxy.port,
                 password=settings.esphome_proxy_password,
+                noise_psk=settings.esphome_proxy_encryption_key or None,
             )
 
             # Connect with timeout

@@ -73,6 +73,8 @@ ESPHOME_PROXY_MODE=true
 ESPHOME_PROXY_HOST=192.168.1.100
 ESPHOME_PROXY_PORT=6053
 ESPHOME_PROXY_NAME=my-esphome-proxy
+# Needed if the proxy has API encryption enabled (api: encryption: key: in its YAML)
+ESPHOME_PROXY_ENCRYPTION_KEY=your-base64-key
 ```
 
 ### Docker Compose
