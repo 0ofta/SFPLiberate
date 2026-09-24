@@ -21,11 +21,13 @@ api_router.include_router(health.router, tags=["health"])
 if settings.ha_addon_mode:
     # Home Assistant Add-On mode: Use HA Bluetooth API
     from app.api.v1 import ha_bluetooth
+
     api_router.include_router(ha_bluetooth.router, tags=["ha-bluetooth"])
 elif settings.esphome_proxy_mode:
     # Standalone mode with ESPHome proxy
     # Import ESPHome modules only when needed (they require zeroconf)
     from app.api.v1 import esphome, esphome_websocket
+
     # Always include ESPHome status endpoint (reports enabled/disabled)
     api_router.include_router(esphome_status.router, tags=["esphome"])
     api_router.include_router(esphome.router, tags=["esphome-proxy"])

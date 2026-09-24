@@ -2,7 +2,7 @@
 
 import re
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import AfterValidator, BaseModel, Field
 
@@ -11,9 +11,7 @@ def _validate_mac_address(v: str) -> str:
     """Validate and normalize MAC address format."""
     v = v.upper().replace("-", ":")
     if not re.match(r"^([0-9A-F]{2}:){5}[0-9A-F]{2}$", v):
-        raise ValueError(
-            "Invalid MAC address format. Expected format: AA:BB:CC:DD:EE:FF"
-        )
+        raise ValueError("Invalid MAC address format. Expected format: AA:BB:CC:DD:EE:FF")
     return v
 
 
@@ -40,17 +38,13 @@ class DiscoveredDevice(BaseModel):
     rssi: int = Field(..., description="Signal strength (dBm)")
     best_proxy: str = Field(..., description="Proxy name with best RSSI")
     last_seen: datetime = Field(default_factory=datetime.utcnow)
-    advertisement_data: dict | None = Field(
-        None, description="Raw advertisement data"
-    )
+    advertisement_data: dict[str, Any] | None = Field(None, description="Raw advertisement data")
 
 
 class DeviceConnectionRequest(BaseModel):
     """Request to connect to a BLE device and retrieve UUIDs."""
 
-    mac_address: MACAddress = Field(
-        ..., description="BLE MAC address (format: AA:BB:CC:DD:EE:FF)"
-    )
+    mac_address: MACAddress = Field(..., description="BLE MAC address (format: AA:BB:CC:DD:EE:FF)")
 
 
 class DeviceConnectionResponse(BaseModel):
@@ -67,12 +61,8 @@ class ESPHomeStatus(BaseModel):
     """Status of ESPHome proxy feature."""
 
     enabled: bool = Field(..., description="Whether ESPHome proxy mode is enabled")
-    proxies_discovered: int = Field(
-        default=0, description="Number of ESPHome proxies found"
-    )
-    devices_discovered: int = Field(
-        default=0, description="Number of SFP devices found"
-    )
+    proxies_discovered: int = Field(default=0, description="Number of ESPHome proxies found")
+    devices_discovered: int = Field(default=0, description="Number of SFP devices found")
     mode: str = Field(default="esphome", description="Connection mode")
 
 

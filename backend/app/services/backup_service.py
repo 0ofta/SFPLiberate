@@ -4,6 +4,7 @@ import asyncio
 import shutil
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 import structlog
@@ -30,7 +31,7 @@ class DatabaseBackupService:
         """
         self.settings = get_settings()
         self.max_backups = max_backups
-        self._task: asyncio.Task | None = None
+        self._task: asyncio.Task[None] | None = None
         self._running = False
 
         # Derive database file path from database_url
@@ -65,10 +66,7 @@ class DatabaseBackupService:
         path_str = parsed.path
 
         if not path_str:
-            raise ValueError(
-                f"Invalid database URL: {db_url}. "
-                f"Path component is empty."
-            )
+            raise ValueError(f"Invalid database URL: {db_url}. Path component is empty.")
 
         return Path(path_str)
 
@@ -181,7 +179,7 @@ class DatabaseBackupService:
             )
 
             # Remove excess backups
-            files_to_remove = backup_files[self.max_backups:]
+            files_to_remove = backup_files[self.max_backups :]
             for backup_file in files_to_remove:
                 backup_file.unlink()
                 logger.info("database_backup_removed", file=backup_file.name)
@@ -196,7 +194,7 @@ class DatabaseBackupService:
         except Exception as e:
             logger.error("database_backup_cleanup_failed", error=str(e))
 
-    async def list_backups(self) -> list[dict]:
+    async def list_backups(self) -> list[dict[str, Any]]:
         """
         List available backup files.
 
@@ -215,11 +213,13 @@ class DatabaseBackupService:
             backups = []
             for backup_file in backup_files:
                 stat = backup_file.stat()
-                backups.append({
-                    "name": backup_file.name,
-                    "size_bytes": stat.st_size,
-                    "created_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                })
+                backups.append(
+                    {
+                        "name": backup_file.name,
+                        "size_bytes": stat.st_size,
+                        "created_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    }
+                )
 
             return backups
 

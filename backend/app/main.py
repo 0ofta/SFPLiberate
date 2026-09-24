@@ -1,21 +1,30 @@
 """FastAPI application with modern patterns."""
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import TYPE_CHECKING
 
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app.api.v1.router import api_router
 from app.config import get_settings
 from app.core.database import init_db
 from app.core.logging import setup_logging
 
+if TYPE_CHECKING:
+    # Aliased: lifespan() lazily imports the same names locally for optional dependencies
+    from app.services.backup_service import DatabaseBackupService as _BackupService
+    from app.services.esphome import ESPHomeProxyService as _ESPHomeProxyService
+    from app.services.ha_bluetooth import HomeAssistantBluetoothClient as _HAClient
+
 settings = get_settings()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """
     Lifespan context manager (replaces deprecated on_event).
 
@@ -33,6 +42,7 @@ async def lifespan(app: FastAPI):
     # Initialize BLE tracer if enabled
     if settings.ble_trace_logging:
         from app.services.ha_bluetooth.ble_tracer import init_tracer
+
         init_tracer(enabled=True)
         logger.info("ble_tracer_enabled")
 
@@ -40,8 +50,8 @@ async def lifespan(app: FastAPI):
     logger.info("database_initialized")
 
     # Initialize Bluetooth service based on deployment mode
-    bluetooth_service = None
-    backup_service = None
+    bluetooth_service: _HAClient | _ESPHomeProxyService | None = None
+    backup_service: _BackupService | None = None
 
     if settings.ha_addon_mode:
         # Home Assistant Add-On mode: Use HA Bluetooth API
@@ -65,6 +75,7 @@ async def lifespan(app: FastAPI):
         # Start database backup service (HA Add-on only)
         try:
             from app.services.backup_service import DatabaseBackupService
+
             backup_service = DatabaseBackupService(max_backups=settings.database_backup_max_count)
             await backup_service.start()
         except Exception as e:
@@ -74,6 +85,7 @@ async def lifespan(app: FastAPI):
         # Standalone mode: Use ESPHome proxy service
         try:
             from app.services.esphome import ESPHomeProxyService
+
             bluetooth_service = ESPHomeProxyService()
             await bluetooth_service.start()
             logger.info("esphome_proxy_service_started")
@@ -100,6 +112,7 @@ async def lifespan(app: FastAPI):
     # Close BLE tracer if enabled
     if settings.ble_trace_logging:
         from app.services.ha_bluetooth.ble_tracer import get_tracer
+
         get_tracer().close()
 
     logger.info("application_shutdown")
@@ -128,22 +141,20 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
 # Backward compatibility: Keep legacy /api routes
-@app.get("/api/modules")
-async def legacy_get_modules():
+@app.get("/api/modules", response_model=None)
+async def legacy_get_modules() -> RedirectResponse:
     """Legacy endpoint - redirects to v1."""
-    from fastapi.responses import RedirectResponse
-
     return RedirectResponse(url=f"{settings.api_v1_prefix}/modules")
 
 
-@app.get("/health")
-async def health_check():
+@app.get("/health", response_model=None)
+async def health_check() -> dict[str, str]:
     """Root health check."""
     return {"status": "healthy", "version": settings.version}
 
 
-@app.get("/")
-async def root():
+@app.get("/", response_model=None)
+async def root() -> dict[str, str]:
     """Root endpoint."""
     return {
         "name": settings.project_name,

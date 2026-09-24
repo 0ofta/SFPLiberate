@@ -210,7 +210,7 @@ class BLETracer:
             self._logger.debug(f"  Hex: {value.hex()}")
             if value:
                 try:
-                    decoded = value.decode('utf-8', errors='replace')
+                    decoded = value.decode("utf-8", errors="replace")
                     self._logger.debug(f"  ASCII: {repr(decoded)}")
                 except Exception:
                     self._logger.debug("  Value is not valid UTF-8, skipping ASCII representation.")
@@ -244,7 +244,7 @@ class BLETracer:
             self._logger.debug(f"  Hex: {value.hex()}")
             if value:
                 try:
-                    decoded = value.decode('utf-8', errors='replace')
+                    decoded = value.decode("utf-8", errors="replace")
                     self._logger.debug(f"  ASCII: {repr(decoded)}")
                 except Exception:
                     self._logger.debug("  Value is not valid UTF-8, skipping ASCII representation.")
@@ -269,7 +269,7 @@ class BLETracer:
         self._logger.debug(f"  Hex: {value.hex()}")
         if value:
             try:
-                decoded = value.decode('utf-8', errors='replace')
+                decoded = value.decode("utf-8", errors="replace")
                 self._logger.debug(f"  ASCII: {repr(decoded)}")
             except Exception:
                 self._logger.debug("  Value is not valid UTF-8, skipping ASCII representation.")

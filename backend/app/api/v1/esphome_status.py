@@ -15,7 +15,7 @@ class ESPHomeStatusResponse(BaseModel):
 
 
 @router.get("/status", response_model=ESPHomeStatusResponse)
-async def get_esphome_status():
+async def get_esphome_status() -> ESPHomeStatusResponse:
     """
     Get ESPHome proxy status.
 

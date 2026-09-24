@@ -10,8 +10,7 @@ class HABluetoothDevice(BaseModel):
     name: str = Field(..., description="Device friendly name")
     rssi: int = Field(-100, description="Signal strength (RSSI)")
     source: str = Field(
-        "hass_bluetooth",
-        description="Source of discovery (esphome_proxy, hass_bluetooth, etc.)"
+        "hass_bluetooth", description="Source of discovery (esphome_proxy, hass_bluetooth, etc.)"
     )
     last_seen: str | None = Field(None, description="Last seen timestamp from HA")
 
@@ -22,7 +21,7 @@ class HABluetoothDevice(BaseModel):
                 "name": "SFP Wizard",
                 "rssi": -65,
                 "source": "esphome_proxy_1",
-                "last_seen": "2025-11-06T10:30:00Z"
+                "last_seen": "2025-11-06T10:30:00Z",
             }
         }
 
@@ -33,11 +32,7 @@ class HADeviceConnectionRequest(BaseModel):
     mac_address: str = Field(..., description="Device MAC address to connect to")
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "mac_address": "AA:BB:CC:DD:EE:FF"
-            }
-        }
+        json_schema_extra = {"example": {"mac_address": "AA:BB:CC:DD:EE:FF"}}
 
 
 class HADeviceConnectionResponse(BaseModel):
@@ -56,7 +51,7 @@ class HADeviceConnectionResponse(BaseModel):
                 "notify_char_uuid": "DC272A22-43F2-416B-8FA5-63A071542FAC",
                 "write_char_uuid": "9280F26C-A56F-43EA-B769-D5D732E1AC67",
                 "device_name": "SFP Wizard",
-                "source": "esphome_proxy_1"
+                "source": "esphome_proxy_1",
             }
         }
 
@@ -75,6 +70,6 @@ class HABluetoothStatus(BaseModel):
                 "enabled": True,
                 "devices_discovered": 3,
                 "ha_api_url": "http://supervisor/core/api",
-                "connected": True
+                "connected": True,
             }
         }

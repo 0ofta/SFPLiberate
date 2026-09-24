@@ -39,7 +39,9 @@ class HomeAssistantBluetoothClient:
             device_patterns: List of device name patterns to filter (case-insensitive)
         """
         self.ha_api_url = ha_api_url or os.getenv("HA_API_URL", "http://supervisor/core/api")
-        self.ha_ws_url = ha_ws_url or os.getenv("HA_WS_URL", "ws://supervisor/core/websocket")
+        self.ha_ws_url = (
+            ha_ws_url if ha_ws_url else os.getenv("HA_WS_URL", "ws://supervisor/core/websocket")
+        )
         self.supervisor_token = supervisor_token or os.getenv("SUPERVISOR_TOKEN", "")
 
         # Parse device patterns from env if provided as JSON array
@@ -54,7 +56,7 @@ class HomeAssistantBluetoothClient:
         self._session: aiohttp.ClientSession | None = None
         self._ws: aiohttp.ClientWebSocketResponse | None = None
         self._discovered_devices: dict[str, HABluetoothDevice] = {}
-        self._ws_task: asyncio.Task | None = None
+        self._ws_task: asyncio.Task[None] | None = None
         self._connected = False
 
         logger.info(
@@ -64,12 +66,14 @@ class HomeAssistantBluetoothClient:
 
         # Log session info to tracer
         tracer = get_tracer()
-        tracer.log_session_info({
-            "mode": "Home Assistant Add-on",
-            "api_url": self.ha_api_url,
-            "ws_url": self.ha_ws_url,
-            "device_patterns": self.device_patterns,
-        })
+        tracer.log_session_info(
+            {
+                "mode": "Home Assistant Add-on",
+                "api_url": self.ha_api_url,
+                "ws_url": self.ha_ws_url,
+                "device_patterns": self.device_patterns,
+            }
+        )
 
     async def start(self) -> None:
         """Initialize connection to HA API and start listening for device updates."""
@@ -188,8 +192,7 @@ class HomeAssistantBluetoothClient:
 
         tracer = get_tracer()
         tracer.log_device_scan_start(
-            patterns=self.device_patterns,
-            filters={"source": "Home Assistant API"}
+            patterns=self.device_patterns, filters={"source": "Home Assistant API"}
         )
 
         try:
@@ -242,7 +245,7 @@ class HomeAssistantBluetoothClient:
                         "source": attrs.get("source", "hass_bluetooth"),
                         "last_seen": state.get("last_changed"),
                         "attributes": attrs,
-                    }
+                    },
                 )
 
             # Update cache
@@ -290,15 +293,17 @@ class HomeAssistantBluetoothClient:
         """Listen for Bluetooth device updates via WebSocket."""
         logger.info("Starting WebSocket listener...")
 
+        if self._session is None:
+            # start() creates the session before launching this task; stop() cancels it first
+            logger.error("WebSocket listener started without an HTTP session")
+            return
+
         try:
             # Connect to WebSocket
             self._ws = await self._session.ws_connect(self.ha_ws_url)
 
             # Authenticate
-            await self._ws.send_json({
-                "type": "auth",
-                "access_token": self.supervisor_token
-            })
+            await self._ws.send_json({"type": "auth", "access_token": self.supervisor_token})
 
             # Wait for auth response
             auth_response = await self._ws.receive_json()
@@ -309,11 +314,9 @@ class HomeAssistantBluetoothClient:
             logger.info("WebSocket authenticated")
 
             # Subscribe to state_changed events
-            await self._ws.send_json({
-                "id": 1,
-                "type": "subscribe_events",
-                "event_type": "state_changed"
-            })
+            await self._ws.send_json(
+                {"id": 1, "type": "subscribe_events", "event_type": "state_changed"}
+            )
 
             # Listen for messages
             async for msg in self._ws:
@@ -381,7 +384,7 @@ class HomeAssistantBluetoothClient:
                     "source": attrs.get("source", "hass_bluetooth"),
                     "last_seen": new_state.get("last_changed"),
                     "update_via": "websocket",
-                }
+                },
             )
 
             logger.debug(f"Updated device via WebSocket: {name} ({mac})")
