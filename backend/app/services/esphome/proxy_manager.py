@@ -1,8 +1,9 @@
 """ESPHome proxy discovery and connection management via mDNS."""
 
 import asyncio
-import logging
 from collections.abc import Callable
+
+import structlog
 
 # Optional zeroconf dependency (only needed for ESPHome proxy mode)
 try:
@@ -19,7 +20,9 @@ except ImportError:
 
 # Optional aioesphomeapi dependency (only needed for ESPHome proxy mode)
 try:
-    from aioesphomeapi import APIClient, APIConnectionError
+    from aioesphomeapi.client import APIClient
+    from aioesphomeapi.core import APIConnectionError
+    from aioesphomeapi.model import BluetoothLEAdvertisement
 
     ESPHOME_AVAILABLE = True
 except ImportError:
@@ -29,13 +32,16 @@ except ImportError:
 
 from .schemas import ESPHomeProxy
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
+
+# Called with (advertisement, proxy_name=...) for every BLE advertisement a proxy sees
+AdvertisementCallback = Callable[..., None]
 
 
 class ProxyManager:
     """Manages ESPHome proxy discovery and connections via mDNS."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize proxy manager."""
         if not ESPHOME_AVAILABLE:
             raise ImportError(
@@ -48,7 +54,7 @@ class ProxyManager:
         self.clients: dict[str, APIClient] = {}
         self.zeroconf: AsyncZeroconf | None = None
         self._browser: ServiceBrowser | None = None
-        self._advertisement_callback: Callable | None = None
+        self._advertisement_callback: AdvertisementCallback | None = None
 
     def _on_service_state_change(
         self, zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
@@ -93,7 +99,7 @@ class ProxyManager:
             handlers=[self._on_service_state_change],
         )
 
-    async def connect_all(self, advertisement_callback: Callable) -> None:
+    async def connect_all(self, advertisement_callback: AdvertisementCallback) -> None:
         """
         Connect to all discovered proxies and subscribe to BLE advertisements.
 
@@ -140,7 +146,7 @@ class ProxyManager:
             logger.info(f"Connected to proxy: {name}")
 
             # Subscribe to BLE advertisements
-            def on_bluetooth_le_advertisement(advertisement):
+            def on_bluetooth_le_advertisement(advertisement: "BluetoothLEAdvertisement") -> None:
                 """Forward advertisement to callback with proxy name."""
                 if self._advertisement_callback:
                     try:

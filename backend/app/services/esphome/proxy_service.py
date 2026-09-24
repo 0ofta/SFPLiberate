@@ -1,15 +1,24 @@
 """Main ESPHome Bluetooth Proxy service coordinator."""
 
 import asyncio
-import logging
 import time
 from typing import Optional
+
+import structlog
 
 from .device_manager import DeviceManager
 from .proxy_manager import ProxyManager
 from .schemas import DeviceConnectionResponse, DiscoveredDevice, ESPHomeProxy
 
-logger = logging.getLogger(__name__)
+try:
+    from aioesphomeapi.core import TimeoutAPIError
+    from aioesphomeapi.model import BluetoothLEAdvertisement, ESPHomeBluetoothGATTServices
+
+    from .ble_utils import can_notify, can_write, connect_ble_device, int_to_mac, mac_to_int
+except ImportError:
+    pass  # ProxyManager() raises a clear ImportError when aioesphomeapi is missing
+
+logger = structlog.get_logger()
 
 
 class ESPHomeProxyService:
@@ -21,12 +30,12 @@ class ESPHomeProxyService:
 
     _instance: Optional["ESPHomeProxyService"] = None
 
-    def __new__(cls):
+    def __new__(cls) -> "ESPHomeProxyService":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the service (only once due to singleton pattern)."""
         if hasattr(self, "_initialized"):
             return
@@ -38,8 +47,8 @@ class ESPHomeProxyService:
         self._initialized = True
         self.proxy_manager = ProxyManager()
         self.device_manager = DeviceManager(device_expiry_seconds=settings.esphome_device_expiry)
-        self._discovery_task: asyncio.Task | None = None
-        self._cleanup_task: asyncio.Task | None = None
+        self._discovery_task: asyncio.Task[None] | None = None
+        self._cleanup_task: asyncio.Task[None] | None = None
         self._advertisement_cache: dict[tuple[str, int], float] = {}
         self._cache_window = settings.esphome_cache_window
 
@@ -159,7 +168,9 @@ class ESPHomeProxyService:
             except Exception as e:
                 logger.error(f"Error in cleanup loop: {e}", exc_info=True)
 
-    def _handle_advertisement(self, advertisement, proxy_name: str) -> None:
+    def _handle_advertisement(
+        self, advertisement: "BluetoothLEAdvertisement", proxy_name: str
+    ) -> None:
         """
         Process a BLE advertisement from a proxy.
 
@@ -170,13 +181,12 @@ class ESPHomeProxyService:
             proxy_name: Name of proxy that received the advertisement
         """
         try:
-            # Extract advertisement data
-            mac = getattr(advertisement, "address", None)
-            name = getattr(advertisement, "name", "") or ""
-            rssi = getattr(advertisement, "rssi", -100)
-
-            if not mac:
+            # Extract advertisement data (aioesphomeapi gives the address as an int)
+            if not advertisement.address:
                 return
+            mac = int_to_mac(advertisement.address)
+            name = advertisement.name or ""
+            rssi = advertisement.rssi
 
             # Deduplicate advertisements
             cache_key = (mac, rssi)
@@ -273,22 +283,24 @@ class ESPHomeProxyService:
 
         settings = get_settings()
 
+        address = mac_to_int(mac_address)
+        cancel_connection_callback = None
+
         try:
-            # Connect to device with timeout
-            await asyncio.wait_for(
-                client.bluetooth_device_connect(mac_address),
-                timeout=settings.esphome_connection_timeout,
+            # Connect to device (aioesphomeapi enforces the timeout and cleans up on expiry)
+            cancel_connection_callback = await connect_ble_device(
+                client, mac_address, timeout=settings.esphome_connection_timeout
             )
 
             logger.info("proxy_connect_success", mac=mac_address)
 
             # Get GATT services
             services = await asyncio.wait_for(
-                client.bluetooth_gatt_get_services(mac_address),
+                client.bluetooth_gatt_get_services(address),
                 timeout=settings.esphome_connection_timeout,
             )
 
-            logger.debug(f"Retrieved {len(services)} services from device")
+            logger.debug(f"Retrieved {len(services.services)} services from device")
 
             # Parse services to find notify + write characteristics
             service_uuid, notify_uuid, write_uuid = self._parse_gatt_services(services)
@@ -313,26 +325,30 @@ class ESPHomeProxyService:
                 proxy_used=proxy_name,
             )
 
-        except TimeoutError as exc:
+        except (TimeoutError, TimeoutAPIError) as exc:
             logger.error(f"Timeout connecting to device {mac_address}")
             raise RuntimeError("Connection timeout - device may be out of range or busy") from exc
 
         finally:
             # Always disconnect
             try:
-                await client.bluetooth_device_disconnect(mac_address)
+                await client.bluetooth_device_disconnect(address)
                 logger.debug("proxy_disconnect", mac=mac_address)
             except Exception as e:
                 logger.warning(f"Error disconnecting from device: {e}")
+            if cancel_connection_callback:
+                cancel_connection_callback()
 
-    def _parse_gatt_services(self, services) -> tuple[str, str, str]:
+    def _parse_gatt_services(
+        self, services: "ESPHomeBluetoothGATTServices"
+    ) -> tuple[str, str, str]:
         """
         Parse GATT services to find notify/write characteristics.
 
         Looks for a service with BOTH a notify and write characteristic.
 
         Args:
-            services: List of GATT services from aioesphomeapi
+            services: GATT services from aioesphomeapi
 
         Returns:
             Tuple of (service_uuid, notify_char_uuid, write_char_uuid)
@@ -340,21 +356,16 @@ class ESPHomeProxyService:
         Raises:
             ValueError: If no suitable service found
         """
-        for service in services:
+        for service in services.services:
             notify_char = None
             write_char = None
 
-            # Check each characteristic in the service
+            # Check each characteristic in the service (properties is a GATT bitmask)
             for char in service.characteristics:
-                # Check properties (aioesphomeapi exposes these as attributes)
-                if hasattr(char, "properties"):
-                    props = char.properties
-                    if hasattr(props, "notify") and props.notify:
-                        notify_char = str(char.uuid)
-                    if (hasattr(props, "write") and props.write) or (
-                        hasattr(props, "write_without_response") and props.write_without_response
-                    ):
-                        write_char = str(char.uuid)
+                if can_notify(char):
+                    notify_char = str(char.uuid)
+                if can_write(char):
+                    write_char = str(char.uuid)
 
             # If we found both, return this service
             if notify_char and write_char:

@@ -1,20 +1,26 @@
 """Manages persistent BLE device connections via ESPHome proxies."""
 
 import asyncio
-import logging
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
+
+import structlog
 
 try:
-    from aioesphomeapi import APIClient
+    from aioesphomeapi.client import APIClient
+    from aioesphomeapi.core import TimeoutAPIError
+    from aioesphomeapi.model import ESPHomeBluetoothGATTServices
+
+    from .ble_utils import connect_ble_device, mac_to_int
 
     ESPHOME_AVAILABLE = True
 except ImportError:
     ESPHOME_AVAILABLE = False
-    APIClient = None  # type: ignore
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
+
+NotificationCallback = Callable[[str, bytes], None]
 
 
 @dataclass
@@ -30,7 +36,11 @@ class ActiveConnection:
     write_char_uuid: str
     notify_handle: int  # ESPHome uses handles, not UUIDs
     write_handle: int
-    notification_callback: Callable | None = None
+    notification_callback: NotificationCallback | None = None
+    # Returned by bluetooth_gatt_start_notify: awaitable that turns notify off
+    stop_notify: Callable[[], Coroutine[Any, Any, None]] | None = None
+    # Returned by bluetooth_device_connect: unsubscribes from connection state updates
+    cancel_connection_callback: Callable[[], None] | None = None
 
 
 class ConnectionManager:
@@ -45,13 +55,13 @@ class ConnectionManager:
 
     _instance: Optional["ConnectionManager"] = None
 
-    def __new__(cls):
+    def __new__(cls) -> "ConnectionManager":
         """Singleton pattern - return existing instance if available."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize connection manager (only once due to singleton)."""
         # Skip initialization if already done
         if hasattr(self, "_initialized"):
@@ -75,7 +85,7 @@ class ConnectionManager:
         notify_char_uuid: str,
         write_char_uuid: str,
         device_name: str | None = None,
-        notification_callback: Callable | None = None,
+        notification_callback: NotificationCallback | None = None,
     ) -> None:
         """
         Establish persistent connection to a BLE device.
@@ -109,18 +119,19 @@ class ConnectionManager:
             client_id=client_id,
         )
 
+        address = mac_to_int(mac_address)
+
         try:
-            # Connect to device
-            await asyncio.wait_for(
-                client.bluetooth_device_connect(mac_address),
-                timeout=settings.esphome_connection_timeout,
+            # Connect to device (aioesphomeapi enforces the timeout and cleans up on expiry)
+            cancel_connection_callback = await connect_ble_device(
+                client, mac_address, timeout=settings.esphome_connection_timeout
             )
 
             logger.info(f"Connected to device {mac_address}")
 
             # Discover services to get characteristic handles
             services = await asyncio.wait_for(
-                client.bluetooth_gatt_get_services(mac_address),
+                client.bluetooth_gatt_get_services(address),
                 timeout=settings.esphome_connection_timeout,
             )
 
@@ -132,8 +143,9 @@ class ConnectionManager:
             logger.info(f"Discovered handles: notify={notify_handle}, write={write_handle}")
 
             # Subscribe to notifications if callback provided
+            stop_notify = None
             if notification_callback:
-                await self._subscribe_notifications(
+                stop_notify = await self._subscribe_notifications(
                     client, mac_address, notify_handle, notify_char_uuid, notification_callback
                 )
 
@@ -149,11 +161,13 @@ class ConnectionManager:
                 notify_handle=notify_handle,
                 write_handle=write_handle,
                 notification_callback=notification_callback,
+                stop_notify=stop_notify,
+                cancel_connection_callback=cancel_connection_callback,
             )
 
             logger.info(f"Device connection established for client {client_id}")
 
-        except TimeoutError as exc:
+        except (TimeoutError, TimeoutAPIError) as exc:
             logger.error(f"Timeout connecting to device {mac_address}")
             raise RuntimeError("Connection timeout - device may be out of range or busy") from exc
         except Exception as e:
@@ -161,7 +175,7 @@ class ConnectionManager:
             raise RuntimeError(f"Connection failed: {e}") from e
 
     def _find_characteristic_handles(
-        self, services, notify_uuid: str, write_uuid: str
+        self, services: "ESPHomeBluetoothGATTServices", notify_uuid: str, write_uuid: str
     ) -> tuple[int, int]:
         """
         Find characteristic handles from service discovery.
@@ -184,7 +198,7 @@ class ConnectionManager:
         notify_uuid_normalized = notify_uuid.upper().replace("-", "")
         write_uuid_normalized = write_uuid.upper().replace("-", "")
 
-        for service in services:
+        for service in services.services:
             for char in service.characteristics:
                 char_uuid_normalized = str(char.uuid).upper().replace("-", "")
 
@@ -227,14 +241,10 @@ class ConnectionManager:
         logger.info(f"Disconnecting device {connection.mac_address} for client {client_id}")
 
         try:
-            # Unsubscribe from notifications using handle
-            if connection.notification_callback:
+            # Turn off notifications
+            if connection.stop_notify:
                 try:
-                    await connection.client.bluetooth_gatt_notify(
-                        address=connection.mac_address,
-                        handle=connection.notify_handle,
-                        enable=False,
-                    )
+                    await connection.stop_notify()
                     logger.debug(
                         "esphome_unsubscribed",
                         handle=connection.notify_handle,
@@ -244,13 +254,15 @@ class ConnectionManager:
                     logger.warning(f"Error unsubscribing from notifications: {e}")
 
             # Disconnect from device
-            await connection.client.bluetooth_device_disconnect(connection.mac_address)
+            await connection.client.bluetooth_device_disconnect(mac_to_int(connection.mac_address))
             logger.info(f"Disconnected from device {connection.mac_address}")
 
         except Exception as e:
             logger.warning(f"Error disconnecting device: {e}")
 
         finally:
+            if connection.cancel_connection_callback:
+                connection.cancel_connection_callback()
             del self.connections[client_id]
 
     async def write_characteristic(
@@ -295,9 +307,9 @@ class ConnectionManager:
         try:
             # ESPHome API: bluetooth_gatt_write (uses handle, not UUID)
             await connection.client.bluetooth_gatt_write(
-                address=connection.mac_address,
+                address=mac_to_int(connection.mac_address),
                 handle=connection.write_handle,
-                data=list(data),  # ESPHome expects list[int]
+                data=bytes(data),
                 response=with_response,
             )
 
@@ -317,8 +329,8 @@ class ConnectionManager:
         mac_address: str,
         notify_handle: int,
         notify_char_uuid: str,
-        callback: Callable,
-    ) -> None:
+        callback: NotificationCallback,
+    ) -> Callable[[], Coroutine[Any, Any, None]]:
         """
         Subscribe to characteristic notifications.
 
@@ -328,6 +340,9 @@ class ConnectionManager:
             notify_handle: Characteristic handle (not UUID)
             notify_char_uuid: Characteristic UUID to send to the frontend
             callback: Function to call on notifications
+
+        Returns:
+            Coroutine function that stops the notify session
         """
         logger.info(
             "esphome_subscribe",
@@ -335,36 +350,27 @@ class ConnectionManager:
             mac=mac_address,
         )
 
+        def on_notification(handle: int, data: bytearray) -> None:
+            """Handle incoming notification (aioesphomeapi filters by address and handle)."""
+            logger.debug(
+                "esphome_notification",
+                bytes=len(data),
+                handle=handle,
+            )
+            try:
+                # Pass characteristic UUID to frontend, not handle
+                callback(notify_char_uuid, bytes(data))
+            except Exception as e:
+                logger.error(f"Error in notification callback: {e}", exc_info=True)
+
         try:
-            # ESPHome notification callback
-            def on_notification(address: str, handle: int, data: bytes):
-                """Handle incoming notification."""
-                if address.upper() == mac_address.upper() and handle == notify_handle:
-                    logger.debug(
-                        "esphome_notification",
-                        bytes=len(data),
-                        handle=handle,
-                    )
-                    try:
-                        # Convert list[int] to bytes if needed
-                        if isinstance(data, list):
-                            data = bytes(data)
-                        # Pass characteristic UUID to frontend, not handle
-                        callback(notify_char_uuid, data)
-                    except Exception as e:
-                        logger.error(f"Error in notification callback: {e}", exc_info=True)
-
-            # Register the callback to receive notifications from the device
-            await client.subscribe_bluetooth_gatt_notifications(on_notification)
-
-            # Enable notifications on the characteristic
-            await client.bluetooth_gatt_notify(
-                address=mac_address,
-                handle=notify_handle,
-                enable=True,
+            # Registers the callback and enables notifications on the characteristic
+            stop_notify, _remove_callback = await client.bluetooth_gatt_start_notify(
+                mac_to_int(mac_address), notify_handle, on_notification
             )
 
             logger.info("esphome_subscribe_complete", handle=notify_handle)
+            return stop_notify
 
         except Exception as e:
             logger.error(f"Failed to subscribe to notifications: {e}", exc_info=True)
