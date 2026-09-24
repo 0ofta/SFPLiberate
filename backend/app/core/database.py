@@ -60,7 +60,9 @@ def _add_missing_columns_sync(conn) -> None:
         if column.name in existing_columns:
             continue
         column_type = column.type.compile(dialect=conn.dialect)
-        conn.execute(text(f"ALTER TABLE {SFPModule.__tablename__} ADD COLUMN {column.name} {column_type}"))
+        conn.execute(
+            text(f"ALTER TABLE {SFPModule.__tablename__} ADD COLUMN {column.name} {column_type}")
+        )
         logger.info("column_added", table=SFPModule.__tablename__, column=column.name)
 
 

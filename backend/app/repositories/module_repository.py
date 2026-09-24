@@ -26,9 +26,7 @@ class ModuleRepository:
 
     async def get_by_sha256(self, sha256: str) -> SFPModule | None:
         """Get module by SHA-256 checksum."""
-        result = await self.session.execute(
-            select(SFPModule).where(SFPModule.sha256 == sha256)
-        )
+        result = await self.session.execute(select(SFPModule).where(SFPModule.sha256 == sha256))
         return result.scalar_one_or_none()
 
     async def create(self, module: SFPModule) -> SFPModule:

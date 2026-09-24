@@ -86,7 +86,8 @@ class ModuleService:
             existing = await self.repository.get_by_sha256(sha256)
             if existing and existing.id != module_id:
                 raise ValueError(
-                    f"This EEPROM content is identical to module #{existing.id} (SHA-256 collision)."
+                    f"This EEPROM content is identical to module #{existing.id} "
+                    "(SHA-256 collision)."
                 )
 
             parsed = parse_sfp_data(eeprom_data)

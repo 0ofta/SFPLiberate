@@ -13,10 +13,17 @@ class ModuleCreate(BaseModel):
 
 
 class ModuleUpdate(BaseModel):
-    """Schema for updating an existing module. All fields optional - only provided fields are changed."""
+    """Schema for updating an existing module.
 
-    eeprom_data_base64: str | None = Field(None, description="Base64-encoded EEPROM data (full replacement)")
-    comments: str | None = Field(None, max_length=1000, description="User notes, stored only in the app")
+    All fields optional - only provided fields are changed.
+    """
+
+    eeprom_data_base64: str | None = Field(
+        None, description="Base64-encoded EEPROM data (full replacement)"
+    )
+    comments: str | None = Field(
+        None, max_length=1000, description="User notes, stored only in the app"
+    )
 
 
 class ModuleInfo(BaseModel):
