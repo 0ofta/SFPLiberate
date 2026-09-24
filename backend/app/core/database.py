@@ -4,6 +4,7 @@ from collections.abc import AsyncGenerator
 
 import structlog
 from sqlalchemy import inspect, text
+from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import get_settings
@@ -38,7 +39,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             raise
 
 
-def _add_missing_columns_sync(conn) -> None:
+def _add_missing_columns_sync(conn: Connection) -> None:
     """
     Add columns that exist on the ORM model but not yet on the live table.
 

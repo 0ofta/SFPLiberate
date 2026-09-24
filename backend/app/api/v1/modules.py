@@ -68,7 +68,7 @@ async def create_module(module: ModuleCreate, db: AsyncSession = Depends(get_db)
 @router.put("/modules/{module_id}", response_model=ModuleInfo)
 async def update_module(
     module_id: int, module: ModuleUpdate, db: AsyncSession = Depends(get_db)
-) -> ModuleInfo:
+) -> SFPModule:
     """
     Update a module. Only the fields actually provided in the request are changed.
 
