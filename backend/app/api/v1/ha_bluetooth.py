@@ -32,14 +32,14 @@ def get_ha_bluetooth_client() -> HomeAssistantBluetoothClient:
         raise HTTPException(
             status_code=503,
             detail="HA Bluetooth client not initialized. "
-            "This endpoint is only available when running as a Home Assistant add-on."
+            "This endpoint is only available when running as a Home Assistant add-on.",
         )
     return _ha_bluetooth_client
 
 
 @router.get("/status", response_model=HABluetoothStatus)
 async def get_status(
-    client: HomeAssistantBluetoothClient = Depends(get_ha_bluetooth_client)
+    client: HomeAssistantBluetoothClient = Depends(get_ha_bluetooth_client),
 ) -> HABluetoothStatus:
     """
     Get status of Home Assistant Bluetooth integration.
@@ -62,7 +62,7 @@ async def get_status(
 
 @router.get("/devices", response_model=list[HABluetoothDevice])
 async def get_devices(
-    client: HomeAssistantBluetoothClient = Depends(get_ha_bluetooth_client)
+    client: HomeAssistantBluetoothClient = Depends(get_ha_bluetooth_client),
 ) -> list[HABluetoothDevice]:
     """
     Get auto-discovered Bluetooth devices from Home Assistant.
@@ -86,7 +86,7 @@ async def get_devices(
 @router.post("/connect", response_model=HADeviceConnectionResponse)
 async def connect_device(
     request: HADeviceConnectionRequest,
-    client: HomeAssistantBluetoothClient = Depends(get_ha_bluetooth_client)
+    client: HomeAssistantBluetoothClient = Depends(get_ha_bluetooth_client),
 ) -> HADeviceConnectionResponse:
     """
     Connect to a BLE device via Home Assistant and retrieve UUIDs.
@@ -111,8 +111,7 @@ async def connect_device(
     try:
         result = await client.connect_to_device(request.mac_address)
         logger.info(
-            f"Successfully connected to {request.mac_address}: "
-            f"service={result.service_uuid}"
+            f"Successfully connected to {request.mac_address}: service={result.service_uuid}"
         )
         return result
 

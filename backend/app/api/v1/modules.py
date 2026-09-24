@@ -28,9 +28,7 @@ async def get_all_modules(db: AsyncSession = Depends(get_db)) -> list[ModuleInfo
 
 
 @router.post("/modules", response_model=StatusMessage)
-async def create_module(
-    module: ModuleCreate, db: AsyncSession = Depends(get_db)
-) -> StatusMessage:
+async def create_module(module: ModuleCreate, db: AsyncSession = Depends(get_db)) -> StatusMessage:
     """
     Save a new SFP module.
 
@@ -67,9 +65,7 @@ async def create_module(
 
 
 @router.get("/modules/{module_id}/eeprom")
-async def get_module_eeprom(
-    module_id: int, db: AsyncSession = Depends(get_db)
-) -> Response:
+async def get_module_eeprom(module_id: int, db: AsyncSession = Depends(get_db)) -> Response:
     """
     Get raw EEPROM binary data for a specific module.
 
@@ -87,9 +83,7 @@ async def get_module_eeprom(
 
 
 @router.delete("/modules/{module_id}", response_model=StatusMessage)
-async def delete_module(
-    module_id: int, db: AsyncSession = Depends(get_db)
-) -> StatusMessage:
+async def delete_module(module_id: int, db: AsyncSession = Depends(get_db)) -> StatusMessage:
     """Delete a module from the library."""
     service = ModuleService(db)
     deleted = await service.delete_module(module_id)

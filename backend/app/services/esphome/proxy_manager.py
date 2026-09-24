@@ -8,6 +8,7 @@ from collections.abc import Callable
 try:
     from zeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
     from zeroconf.asyncio import AsyncZeroconf
+
     ZEROCONF_AVAILABLE = True
 except ImportError:
     ZEROCONF_AVAILABLE = False
@@ -19,6 +20,7 @@ except ImportError:
 # Optional aioesphomeapi dependency (only needed for ESPHome proxy mode)
 try:
     from aioesphomeapi import APIClient, APIConnectionError
+
     ESPHOME_AVAILABLE = True
 except ImportError:
     ESPHOME_AVAILABLE = False
@@ -40,9 +42,7 @@ class ProxyManager:
                 "aioesphomeapi not installed. Install with: pip install aioesphomeapi"
             )
         if not ZEROCONF_AVAILABLE:
-            raise ImportError(
-                "zeroconf not installed. Install with: pip install zeroconf"
-            )
+            raise ImportError("zeroconf not installed. Install with: pip install zeroconf")
 
         self.proxies: dict[str, ESPHomeProxy] = {}
         self.clients: dict[str, APIClient] = {}
@@ -119,6 +119,7 @@ class ProxyManager:
             proxy: Proxy metadata
         """
         from app.config import get_settings
+
         settings = get_settings()
 
         try:
@@ -133,8 +134,7 @@ class ProxyManager:
 
             # Connect with timeout
             await asyncio.wait_for(
-                client.connect(login=True),
-                timeout=settings.esphome_connection_timeout
+                client.connect(login=True), timeout=settings.esphome_connection_timeout
             )
 
             logger.info(f"Connected to proxy: {name}")
@@ -148,9 +148,7 @@ class ProxyManager:
                     except Exception as e:
                         logger.error(f"Error in advertisement callback: {e}", exc_info=True)
 
-            await client.subscribe_bluetooth_le_advertisements(
-                on_bluetooth_le_advertisement
-            )
+            await client.subscribe_bluetooth_le_advertisements(on_bluetooth_le_advertisement)
 
             logger.info(f"Subscribed to BLE advertisements from proxy: {name}")
 
@@ -216,8 +214,4 @@ class ProxyManager:
 
     def get_connected_proxies(self) -> dict[str, ESPHomeProxy]:
         """Get dictionary of all currently connected proxies."""
-        return {
-            name: proxy
-            for name, proxy in self.proxies.items()
-            if proxy.connected
-        }
+        return {name: proxy for name, proxy in self.proxies.items() if proxy.connected}

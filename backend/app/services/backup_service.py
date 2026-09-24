@@ -65,10 +65,7 @@ class DatabaseBackupService:
         path_str = parsed.path
 
         if not path_str:
-            raise ValueError(
-                f"Invalid database URL: {db_url}. "
-                f"Path component is empty."
-            )
+            raise ValueError(f"Invalid database URL: {db_url}. Path component is empty.")
 
         return Path(path_str)
 
@@ -181,7 +178,7 @@ class DatabaseBackupService:
             )
 
             # Remove excess backups
-            files_to_remove = backup_files[self.max_backups:]
+            files_to_remove = backup_files[self.max_backups :]
             for backup_file in files_to_remove:
                 backup_file.unlink()
                 logger.info("database_backup_removed", file=backup_file.name)
@@ -215,11 +212,13 @@ class DatabaseBackupService:
             backups = []
             for backup_file in backup_files:
                 stat = backup_file.stat()
-                backups.append({
-                    "name": backup_file.name,
-                    "size_bytes": stat.st_size,
-                    "created_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                })
+                backups.append(
+                    {
+                        "name": backup_file.name,
+                        "size_bytes": stat.st_size,
+                        "created_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    }
+                )
 
             return backups
 

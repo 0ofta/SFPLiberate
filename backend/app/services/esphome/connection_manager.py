@@ -8,6 +8,7 @@ from typing import Optional
 
 try:
     from aioesphomeapi import APIClient
+
     ESPHOME_AVAILABLE = True
 except ImportError:
     ESPHOME_AVAILABLE = False
@@ -94,6 +95,7 @@ class ConnectionManager:
             RuntimeError: If connection fails
         """
         from app.config import get_settings
+
         settings = get_settings()
 
         # Disconnect existing connection for this client
@@ -127,9 +129,7 @@ class ConnectionManager:
                 services, notify_char_uuid, write_char_uuid
             )
 
-            logger.info(
-                f"Discovered handles: notify={notify_handle}, write={write_handle}"
-            )
+            logger.info(f"Discovered handles: notify={notify_handle}, write={write_handle}")
 
             # Subscribe to notifications if callback provided
             if notification_callback:
@@ -155,9 +155,7 @@ class ConnectionManager:
 
         except TimeoutError as exc:
             logger.error(f"Timeout connecting to device {mac_address}")
-            raise RuntimeError(
-                "Connection timeout - device may be out of range or busy"
-            ) from exc
+            raise RuntimeError("Connection timeout - device may be out of range or busy") from exc
         except Exception as e:
             logger.error(f"Failed to connect to device {mac_address}: {e}", exc_info=True)
             raise RuntimeError(f"Connection failed: {e}") from e

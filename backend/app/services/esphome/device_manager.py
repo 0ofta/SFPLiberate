@@ -44,9 +44,7 @@ class DeviceManager:
         self.rssi_by_proxy[mac][proxy_name] = rssi
 
         # Find best proxy (highest RSSI)
-        best_proxy_name, best_rssi = max(
-            self.rssi_by_proxy[mac].items(), key=lambda x: x[1]
-        )
+        best_proxy_name, best_rssi = max(self.rssi_by_proxy[mac].items(), key=lambda x: x[1])
 
         # Create or update device
         if mac in self.devices:
@@ -55,9 +53,7 @@ class DeviceManager:
             device.rssi = best_rssi
             device.best_proxy = best_proxy_name
             device.last_seen = datetime.utcnow()
-            logger.debug(
-                f"Updated device {name} ({mac}): RSSI={best_rssi} via {best_proxy_name}"
-            )
+            logger.debug(f"Updated device {name} ({mac}): RSSI={best_rssi} via {best_proxy_name}")
         else:
             # Add new device
             device = DiscoveredDevice(
@@ -88,11 +84,7 @@ class DeviceManager:
 
         # Filter out stale devices
         cutoff = datetime.utcnow() - timedelta(seconds=self.device_expiry_seconds)
-        return [
-            device
-            for device in self.devices.values()
-            if device.last_seen > cutoff
-        ]
+        return [device for device in self.devices.values() if device.last_seen > cutoff]
 
     def get_device(self, mac: str) -> DiscoveredDevice | None:
         """
@@ -125,9 +117,7 @@ class DeviceManager:
 
         # Find proxy with highest RSSI
         best_proxy = max(self.rssi_by_proxy[mac].items(), key=lambda x: x[1])
-        logger.debug(
-            f"Selected proxy '{best_proxy[0]}' for device {mac} (RSSI: {best_proxy[1]})"
-        )
+        logger.debug(f"Selected proxy '{best_proxy[0]}' for device {mac} (RSSI: {best_proxy[1]})")
         return best_proxy[0]
 
     def get_proxy_rssi(self, mac: str, proxy_name: str) -> int | None:
@@ -152,11 +142,7 @@ class DeviceManager:
             Number of devices removed
         """
         cutoff = datetime.utcnow() - timedelta(seconds=self.device_expiry_seconds)
-        stale_macs = [
-            mac
-            for mac, device in self.devices.items()
-            if device.last_seen < cutoff
-        ]
+        stale_macs = [mac for mac, device in self.devices.items() if device.last_seen < cutoff]
 
         for mac in stale_macs:
             logger.debug(f"Removing stale device: {mac}")

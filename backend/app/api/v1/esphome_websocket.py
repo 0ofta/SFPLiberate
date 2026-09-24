@@ -241,8 +241,7 @@ class ESPHomeWebSocketHandler:
         await self.send_status(
             connected=True,
             message=(
-                f"Unsubscribe from {message.characteristic_uuid} "
-                "(disconnect to stop notifications)"
+                f"Unsubscribe from {message.characteristic_uuid} (disconnect to stop notifications)"
             ),
         )
 

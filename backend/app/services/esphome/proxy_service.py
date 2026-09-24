@@ -32,6 +32,7 @@ class ESPHomeProxyService:
             return
 
         from app.config import get_settings
+
         settings = get_settings()
 
         self._initialized = True
@@ -54,6 +55,7 @@ class ESPHomeProxyService:
 
         # Register manual proxy if configured (for Docker where mDNS doesn't work)
         from app.config import get_settings
+
         settings = get_settings()
         if settings.esphome_proxy_host and settings.esphome_proxy_name:
             manual_proxy = ESPHomeProxy(
@@ -108,6 +110,7 @@ class ESPHomeProxyService:
     async def _run_discovery_loop(self) -> None:
         """Main discovery loop - connects to proxies and subscribes to advertisements."""
         from app.config import get_settings
+
         settings = get_settings()
 
         while True:
@@ -130,6 +133,7 @@ class ESPHomeProxyService:
     async def _run_cleanup_loop(self) -> None:
         """Periodic cleanup of stale devices and cache entries."""
         from app.config import get_settings
+
         settings = get_settings()
 
         while True:
@@ -266,13 +270,14 @@ class ESPHomeProxyService:
         logger.info("proxy_connect_selected", proxy=proxy_name, mac=mac_address)
 
         from app.config import get_settings
+
         settings = get_settings()
 
         try:
             # Connect to device with timeout
             await asyncio.wait_for(
                 client.bluetooth_device_connect(mac_address),
-                timeout=settings.esphome_connection_timeout
+                timeout=settings.esphome_connection_timeout,
             )
 
             logger.info("proxy_connect_success", mac=mac_address)
@@ -280,7 +285,7 @@ class ESPHomeProxyService:
             # Get GATT services
             services = await asyncio.wait_for(
                 client.bluetooth_gatt_get_services(mac_address),
-                timeout=settings.esphome_connection_timeout
+                timeout=settings.esphome_connection_timeout,
             )
 
             logger.debug(f"Retrieved {len(services)} services from device")
@@ -310,9 +315,7 @@ class ESPHomeProxyService:
 
         except TimeoutError as exc:
             logger.error(f"Timeout connecting to device {mac_address}")
-            raise RuntimeError(
-                "Connection timeout - device may be out of range or busy"
-            ) from exc
+            raise RuntimeError("Connection timeout - device may be out of range or busy") from exc
 
         finally:
             # Always disconnect
@@ -348,8 +351,9 @@ class ESPHomeProxyService:
                     props = char.properties
                     if hasattr(props, "notify") and props.notify:
                         notify_char = str(char.uuid)
-                    if (hasattr(props, "write") and props.write) or \
-                       (hasattr(props, "write_without_response") and props.write_without_response):
+                    if (hasattr(props, "write") and props.write) or (
+                        hasattr(props, "write_without_response") and props.write_without_response
+                    ):
                         write_char = str(char.uuid)
 
             # If we found both, return this service

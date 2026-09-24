@@ -33,6 +33,7 @@ async def lifespan(app: FastAPI):
     # Initialize BLE tracer if enabled
     if settings.ble_trace_logging:
         from app.services.ha_bluetooth.ble_tracer import init_tracer
+
         init_tracer(enabled=True)
         logger.info("ble_tracer_enabled")
 
@@ -65,6 +66,7 @@ async def lifespan(app: FastAPI):
         # Start database backup service (HA Add-on only)
         try:
             from app.services.backup_service import DatabaseBackupService
+
             backup_service = DatabaseBackupService(max_backups=settings.database_backup_max_count)
             await backup_service.start()
         except Exception as e:
@@ -74,6 +76,7 @@ async def lifespan(app: FastAPI):
         # Standalone mode: Use ESPHome proxy service
         try:
             from app.services.esphome import ESPHomeProxyService
+
             bluetooth_service = ESPHomeProxyService()
             await bluetooth_service.start()
             logger.info("esphome_proxy_service_started")
@@ -100,6 +103,7 @@ async def lifespan(app: FastAPI):
     # Close BLE tracer if enabled
     if settings.ble_trace_logging:
         from app.services.ha_bluetooth.ble_tracer import get_tracer
+
         get_tracer().close()
 
     logger.info("application_shutdown")

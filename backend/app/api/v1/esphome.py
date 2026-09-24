@@ -49,9 +49,11 @@ async def device_stream():
     Streams JSON array of discovered devices every second.
     Frontend should connect to this endpoint using EventSource.
     """
+
     async def event_generator():
         """Generate SSE events with discovered devices."""
         from app.config import get_settings
+
         settings = get_settings()
         service = ESPHomeProxyService()
 
