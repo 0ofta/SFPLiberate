@@ -55,7 +55,8 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./backend
-        run: poetry install --no-interaction --with dev
+        # esphome-proxy extra: matches backend/Dockerfile, so the ESPHome code is type-checked and tested
+        run: poetry install --no-interaction --with dev -E esphome-proxy
 
       - name: Run Ruff linter
         working-directory: ./backend
@@ -68,7 +69,6 @@ jobs:
       - name: Run type checking with mypy
         working-directory: ./backend
         run: poetry run mypy app --warn-unused-ignores --no-error-summary
-        continue-on-error: true  # TODO: Make this strict
 
       - name: Run tests with pytest
         working-directory: ./backend
