@@ -39,7 +39,9 @@ class HomeAssistantBluetoothClient:
             device_patterns: List of device name patterns to filter (case-insensitive)
         """
         self.ha_api_url = ha_api_url or os.getenv("HA_API_URL", "http://supervisor/core/api")
-        self.ha_ws_url = ha_ws_url or os.getenv("HA_WS_URL", "ws://supervisor/core/websocket")
+        self.ha_ws_url = (
+            ha_ws_url if ha_ws_url else os.getenv("HA_WS_URL", "ws://supervisor/core/websocket")
+        )
         self.supervisor_token = supervisor_token or os.getenv("SUPERVISOR_TOKEN", "")
 
         # Parse device patterns from env if provided as JSON array
@@ -54,7 +56,7 @@ class HomeAssistantBluetoothClient:
         self._session: aiohttp.ClientSession | None = None
         self._ws: aiohttp.ClientWebSocketResponse | None = None
         self._discovered_devices: dict[str, HABluetoothDevice] = {}
-        self._ws_task: asyncio.Task | None = None
+        self._ws_task: asyncio.Task[None] | None = None
         self._connected = False
 
         logger.info(
@@ -290,6 +292,11 @@ class HomeAssistantBluetoothClient:
     async def _websocket_listener(self) -> None:
         """Listen for Bluetooth device updates via WebSocket."""
         logger.info("Starting WebSocket listener...")
+
+        if self._session is None:
+            # start() creates the session before launching this task; stop() cancels it first
+            logger.error("WebSocket listener started without an HTTP session")
+            return
 
         try:
             # Connect to WebSocket

@@ -1,7 +1,7 @@
 """WebSocket message schemas for ESPHome BLE proxy communication."""
 
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -110,4 +110,4 @@ class BLEErrorMessage(BaseModel):
 
     type: Literal["error"] = Field(default="error")
     error: str = Field(..., description="Error description")
-    details: dict | None = Field(None, description="Additional error details")
+    details: dict[str, Any] | None = Field(None, description="Additional error details")

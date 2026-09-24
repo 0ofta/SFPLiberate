@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/esphome", tags=["ESPHome Proxy"])
 
 
 @router.get("/status", response_model=ESPHomeStatus)
-async def get_status():
+async def get_status() -> ESPHomeStatus:
     """
     Check if ESPHome proxy mode is enabled and get status.
 
@@ -42,7 +43,7 @@ async def get_status():
 
 
 @router.get("/devices")
-async def device_stream():
+async def device_stream() -> StreamingResponse:
     """
     Server-Sent Events stream of discovered SFP devices.
 
@@ -50,7 +51,7 @@ async def device_stream():
     Frontend should connect to this endpoint using EventSource.
     """
 
-    async def event_generator():
+    async def event_generator() -> AsyncIterator[str]:
         """Generate SSE events with discovered devices."""
         from app.config import get_settings
 
@@ -89,7 +90,7 @@ async def device_stream():
 
 
 @router.post("/connect", response_model=DeviceConnectionResponse)
-async def connect_device(request: DeviceConnectionRequest):
+async def connect_device(request: DeviceConnectionRequest) -> DeviceConnectionResponse:
     """
     Connect to a BLE device via ESPHome proxy and retrieve UUIDs.
 

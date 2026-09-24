@@ -114,7 +114,23 @@ class ESPHomeWebSocketHandler:
             logger.info(f"Connect request for device {mac_address}")
 
             # If UUIDs not provided, discover them first
-            if not all([message.service_uuid, message.notify_char_uuid, message.write_char_uuid]):
+            if message.service_uuid and message.notify_char_uuid and message.write_char_uuid:
+                service_uuid = message.service_uuid
+                notify_char_uuid = message.notify_char_uuid
+                write_char_uuid = message.write_char_uuid
+
+                # Select best proxy
+                best_proxy = self.proxy_service.device_manager.select_best_proxy(mac_address)
+                if not best_proxy:
+                    raise ValueError(
+                        f"No proxy has seen device {mac_address}. "
+                        "Make sure the device is advertising and in range."
+                    )
+                proxy_name = best_proxy
+
+                device = self.proxy_service.device_manager.get_device(mac_address)
+                device_name = device.name if device else None
+            else:
                 logger.info("UUIDs not provided, discovering via ESPHome...")
                 uuid_response = await self.proxy_service.connect_to_device(mac_address)
                 service_uuid = uuid_response.service_uuid
@@ -122,21 +138,6 @@ class ESPHomeWebSocketHandler:
                 write_char_uuid = uuid_response.write_char_uuid
                 proxy_name = uuid_response.proxy_used
                 device_name = uuid_response.device_name
-            else:
-                service_uuid = message.service_uuid
-                notify_char_uuid = message.notify_char_uuid
-                write_char_uuid = message.write_char_uuid
-
-                # Select best proxy
-                proxy_name = self.proxy_service.device_manager.select_best_proxy(mac_address)
-                if not proxy_name:
-                    raise ValueError(
-                        f"No proxy has seen device {mac_address}. "
-                        "Make sure the device is advertising and in range."
-                    )
-
-                device = self.proxy_service.device_manager.get_device(mac_address)
-                device_name = device.name if device else None
 
             # Get proxy client
             client = self.proxy_service.proxy_manager.get_client(proxy_name)
@@ -144,7 +145,7 @@ class ESPHomeWebSocketHandler:
                 raise RuntimeError(f"Proxy {proxy_name} is not connected")
 
             # Notification callback
-            def on_notification(char_uuid: str, data: bytes):
+            def on_notification(char_uuid: str, data: bytes) -> None:
                 """Forward notifications to WebSocket client."""
                 response = BLENotificationMessage(
                     characteristic_uuid=char_uuid,

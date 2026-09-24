@@ -4,6 +4,7 @@ import asyncio
 import shutil
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 import structlog
@@ -30,7 +31,7 @@ class DatabaseBackupService:
         """
         self.settings = get_settings()
         self.max_backups = max_backups
-        self._task: asyncio.Task | None = None
+        self._task: asyncio.Task[None] | None = None
         self._running = False
 
         # Derive database file path from database_url
@@ -193,7 +194,7 @@ class DatabaseBackupService:
         except Exception as e:
             logger.error("database_backup_cleanup_failed", error=str(e))
 
-    async def list_backups(self) -> list[dict]:
+    async def list_backups(self) -> list[dict[str, Any]]:
         """
         List available backup files.
 

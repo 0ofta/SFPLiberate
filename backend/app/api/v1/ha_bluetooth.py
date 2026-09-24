@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ha-bluetooth", tags=["Home Assistant Bluetooth"])
 
 # Global client instance (initialized in main.py lifespan)
-_ha_bluetooth_client: HomeAssistantBluetoothClient = None
+_ha_bluetooth_client: HomeAssistantBluetoothClient | None = None
 
 
 def set_ha_bluetooth_client(client: HomeAssistantBluetoothClient) -> None:

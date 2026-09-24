@@ -2,7 +2,7 @@
 
 import re
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import AfterValidator, BaseModel, Field
 
@@ -38,7 +38,7 @@ class DiscoveredDevice(BaseModel):
     rssi: int = Field(..., description="Signal strength (dBm)")
     best_proxy: str = Field(..., description="Proxy name with best RSSI")
     last_seen: datetime = Field(default_factory=datetime.utcnow)
-    advertisement_data: dict | None = Field(None, description="Raw advertisement data")
+    advertisement_data: dict[str, Any] | None = Field(None, description="Raw advertisement data")
 
 
 class DeviceConnectionRequest(BaseModel):

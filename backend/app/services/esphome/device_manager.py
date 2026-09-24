@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime, timedelta
+from typing import Any
 
 from .schemas import DiscoveredDevice
 
@@ -23,7 +24,7 @@ class DeviceManager:
         self.device_expiry_seconds = device_expiry_seconds
 
     def update_device(
-        self, mac: str, name: str, rssi: int, proxy_name: str, ad_data: dict | None = None
+        self, mac: str, name: str, rssi: int, proxy_name: str, ad_data: dict[str, Any] | None = None
     ) -> None:
         """
         Update or add a discovered device.

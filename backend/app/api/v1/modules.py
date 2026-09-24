@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.models.module import SFPModule
 from app.schemas.module import ModuleCreate, ModuleInfo, StatusMessage
 from app.services.module_service import ModuleService
 
@@ -15,7 +16,7 @@ logger = structlog.get_logger()
 
 
 @router.get("/modules", response_model=list[ModuleInfo])
-async def get_all_modules(db: AsyncSession = Depends(get_db)) -> list[ModuleInfo]:
+async def get_all_modules(db: AsyncSession = Depends(get_db)) -> list[SFPModule]:
     """
     Get all saved SFP modules (without BLOB data).
 

@@ -17,7 +17,7 @@ def setup_logging(log_level: str = "INFO", json_logs: bool = True) -> None:
     )
 
     # Configure structlog processors
-    processors = [
+    processors: list[structlog.types.Processor] = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.filter_by_level,
         structlog.stdlib.add_logger_name,
