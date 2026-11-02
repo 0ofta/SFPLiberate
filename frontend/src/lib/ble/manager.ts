@@ -17,6 +17,7 @@ import { connectDirect, isWebBluetoothAvailable, startNotifications, writeChunks
 import { ESPHomeAdapter } from '@/lib/esphome/websocketAdapter';
 import { getModuleRepository } from '@/lib/repositories';
 import { calculateSHA256, parseSFPIdentification } from '@/lib/sfp/parser';
+import { ChecksumError, describeChecksumProblems, verifyChecksums } from '@/lib/sfp/eeprom';
 import { readDeviceInfo, getJson, fetchBinary, sendBinary, buildApiPath, handleApiNotification } from './apiClient';
 
 const TESTED_FIRMWARE_VERSION = '1.0.10';
@@ -544,7 +545,7 @@ export async function listModules() {
 
     return res.json();
   } catch (error) {
-    if (error instanceof APIError) throw error;
+    if (error instanceof APIError || error instanceof ChecksumError) throw error;
     throw new APIError('Network error while fetching modules', undefined, error);
   }
 }
@@ -584,7 +585,7 @@ export async function saveCurrentModule(metadata?: Record<string, any>) {
       id: result.module.id,
     };
   } catch (error) {
-    if (error instanceof APIError) throw error;
+    if (error instanceof APIError || error instanceof ChecksumError) throw error;
     throw new APIError('Failed to save module', undefined, error);
   }
 }
@@ -687,7 +688,16 @@ export function waitForMessage(pattern: string | RegExp, timeoutMs = 5000) {
   });
 }
 
-export async function writeSfpFromModuleId(moduleId: string) {
+/**
+ * Stage a saved module's EEPROM on the SFP Wizard for writing.
+ *
+ * Checks, in order: the SHA-256 matches the saved hash, then both SFF-8472
+ * identification checksums (bytes 63 and 95) match the data. A checksum
+ * mismatch throws ChecksumError unless `allowBadChecksums` is set - some
+ * untouched factory reads carry odd checksums, and cloning those as-is must
+ * stay possible, but only as an explicit choice.
+ */
+export async function writeSfpFromModuleId(moduleId: string, options: { allowBadChecksums?: boolean } = {}) {
   try {
     const repository = getModuleRepository();
 
@@ -715,6 +725,16 @@ export async function writeSfpFromModuleId(moduleId: string) {
     }
     
     logLine(`✓ Hash verified: ${actualHash.substring(0, 16)}...`);
+
+    // 4. VERIFY SFF-8472 CHECKSUMS BEFORE WRITING
+    const checksums = verifyChecksums(buf);
+    if (checksums.ok) {
+      logLine('✓ Checksums verified (bytes 63 and 95).');
+    } else if (options.allowBadChecksums) {
+      logLine(`Warning: writing with wrong checksums, as requested: ${describeChecksumProblems(checksums)}.`);
+    } else {
+      throw new ChecksumError(checksums);
+    }
 
     if (active?.mode === 'direct' && active.deviceId) {
       // New protocol: writeSfpFromBuffer's start/data POST sequence handles
@@ -746,7 +766,7 @@ export async function writeSfpFromModuleId(moduleId: string) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logLine(`Write failed: ${message}`);
-    if (error instanceof APIError) throw error;
+    if (error instanceof APIError || error instanceof ChecksumError) throw error;
     throw new APIError(`Failed to write module: ${message}`, undefined, error);
   }
 }

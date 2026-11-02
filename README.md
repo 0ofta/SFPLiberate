@@ -156,6 +156,13 @@ See [docs/ESPHOME.md](docs/ESPHOME.md) for complete setup guide.
 - **Module Library** - Save, view, delete modules in local database
 - **Duplicate Detection** - SHA-256 checksum prevents duplicate saves
 - **Write Support** - Write saved profiles back to blank modules
+- **EEPROM Editor** - Edit vendor, part number, revision, serial, date code, OUI, connector,
+  wavelength, bit rate, link lengths and transceiver codes. Both SFF-8472 checksums
+  (byte 63 = sum of bytes 0-62, byte 95 = sum of bytes 64-94) are recomputed on every
+  edit, changes are shown as a before/after diff and need an explicit confirm, and the
+  first edit saves an "(edited)" copy so the original read is kept
+- **Pre-write Checksum Check** - A write is blocked when bytes 63/95 do not match the
+  data, with "Repair and write" (fixes only those two bytes) or an explicit "Write anyway"
 - **ESPHome Integration** - iOS/Safari support via ESPHome Bluetooth proxies
 
 ### Coming Soon 🚧
@@ -247,7 +254,7 @@ cd frontend
 npm install
 npm run dev                          # Start dev server
 npm run build                        # Build for production
-npm run test                         # Run tests
+npm test                             # Run unit tests (node --test, tests/*.test.mjs)
 ```
 
 ### Docker Development Mode

@@ -28,7 +28,8 @@ import { writeSfpFromModuleId } from '@/lib/ble/manager';
 import { appwriteResourceIds } from '@/lib/appwrite/config';
 import { mapDocumentToModuleRow, type ModuleRow as Row, type ModuleRow } from './types';
 import { getModuleRepository } from '@/lib/repositories';
-import { patchSerialNumber, patchVendor, patchModel } from '@/lib/sfp/parser';
+import { ChecksumError, describeChecksumProblems } from '@/lib/sfp/eeprom';
+import { EepromEditorDialog, repairModuleChecksums } from '@/components/sfp/EepromEditorDialog';
 import { SfpDataViewer } from '@/components/sfp/SfpDataViewer';
 import { Pencil, Check, X, Trash2, Eye, HelpCircle } from 'lucide-react';
 
@@ -95,10 +96,8 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
   const [rows, setRows] = useState<ModuleRow[]>(initialModules);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
-  type EeepromField = 'vendor' | 'model' | 'serial';
-  const [editingField, setEditingField] = useState<{ id: string; field: EeepromField } | null>(null);
-  const [fieldDraft, setFieldDraft] = useState('');
-  const [savingField, setSavingField] = useState<{ id: string; field: EeepromField } | null>(null);
+  const [editingModule, setEditingModule] = useState<{ id: string; name?: string } | null>(null);
+  const [checksumProblem, setChecksumProblem] = useState<{ id: string; message: string } | null>(null);
   const [editingCommentsId, setEditingCommentsId] = useState<string | null>(null);
   const [commentsDraft, setCommentsDraft] = useState('');
   const [savingCommentsId, setSavingCommentsId] = useState<string | null>(null);
@@ -177,34 +176,6 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
     }
   }, []);
 
-  const FIELD_PATCHERS: Record<EeepromField, (data: ArrayBuffer, value: string) => ArrayBuffer> = {
-    vendor: patchVendor,
-    model: patchModel,
-    serial: patchSerialNumber,
-  };
-
-  const onSaveField = useCallback(async (id: string, field: EeepromField) => {
-    const repository = getModuleRepository();
-    if (!repository.updateModuleEeprom) {
-      toast.error('Editing modules is not supported in this deployment mode.');
-      return;
-    }
-    setSavingField({ id, field });
-    try {
-      const current = await repository.getEEPROMData(id);
-      const patched = FIELD_PATCHERS[field](current, fieldDraft);
-      const updated = await repository.updateModuleEeprom(id, patched);
-      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, serial: updated.serial, vendor: updated.vendor, model: updated.model } : r)));
-      setEditingField(null);
-      toast.success(`${field[0].toUpperCase()}${field.slice(1)} updated`, { description: 'Write it to the device to test.' });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : `Failed to update ${field}.`;
-      toast.error(message);
-    } finally {
-      setSavingField(null);
-    }
-  }, [fieldDraft]);
-
   const onSaveComments = useCallback(async (id: string) => {
     const repository = getModuleRepository();
     if (!repository.updateModuleMetadata) {
@@ -225,17 +196,36 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
     }
   }, [commentsDraft]);
 
-  const onWrite = useCallback(async (id: string) => {
+  const onWrite = useCallback(async (id: string, allowBadChecksums = false) => {
     try {
       toast('Starting write...', { description: `Module #${id}` });
-      await writeSfpFromModuleId(id);
+      await writeSfpFromModuleId(id, { allowBadChecksums });
       toast.success('Staged to device - confirm on the SFP Wizard screen', { description: 'The module is not written until you approve the snapshot on the device itself.' });
     } catch (error) {
+      if (error instanceof ChecksumError) {
+        setChecksumProblem({ id, message: describeChecksumProblems(error.report) });
+        return;
+      }
       const message =
         error instanceof Error ? error.message : 'Failed to write module to device.';
       toast.error(message);
     }
   }, []);
+
+  /** Fixes bytes 63 and 95 of a saved module in place, then retries the write it blocked. */
+  const onRepairAndWrite = useCallback(async (id: string) => {
+    setChecksumProblem(null);
+    try {
+      await repairModuleChecksums(id);
+      toast.success('Checksums repaired', { description: `Module #${id}: bytes 63 and 95 now match the data.` });
+      await load();
+      await onWrite(id);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Repair failed.');
+    }
+  }, [load, onWrite]);
+
+  const closeEditor = useCallback(() => setEditingModule(null), []);
 
   const onDelete = useCallback(async (id: string) => {
     setDeletingId(id);
@@ -281,65 +271,6 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
       );
   }, [query, rows]);
 
-  const renderEditableEepromField = (id: string, field: EeepromField, value: string | undefined) => {
-    const isEditing = editingField?.id === id && editingField.field === field;
-    const isSaving = savingField?.id === id && savingField.field === field;
-
-    if (!isEditing) {
-      return (
-        <div className="flex items-center gap-1.5">
-          <span>{value}</span>
-          <button
-            type="button"
-            aria-label={`Edit ${field} for module ${id}`}
-            className="text-neutral-400 hover:text-neutral-700"
-            onClick={() => {
-              setEditingField({ id, field });
-              setFieldDraft(value ?? '');
-            }}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex items-center gap-1.5">
-        <Input
-          autoFocus
-          value={fieldDraft}
-          maxLength={16}
-          disabled={isSaving}
-          onChange={(e) => setFieldDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSaveField(id, field);
-            if (e.key === 'Escape') setEditingField(null);
-          }}
-          className="h-7 w-36"
-        />
-        <button
-          type="button"
-          aria-label={`Save ${field}`}
-          disabled={isSaving}
-          className="text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
-          onClick={() => onSaveField(id, field)}
-        >
-          <Check className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          aria-label={`Cancel editing ${field}`}
-          disabled={isSaving}
-          className="text-neutral-400 hover:text-neutral-700 disabled:opacity-50"
-          onClick={() => setEditingField(null)}
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    );
-  };
-
   const columns = useMemo<ColumnDef<ModuleRow>[]>(
     () => [
         {
@@ -354,17 +285,17 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
       {
         accessorKey: 'vendor',
         header: () => <VendorModelHeader label="Vendor" />,
-        cell: ({ row }) => renderEditableEepromField(row.original.id, 'vendor', row.original.vendor),
+        cell: ({ row }) => row.original.vendor ?? '—',
       },
       {
         accessorKey: 'model',
         header: () => <VendorModelHeader label="Model" />,
-        cell: ({ row }) => renderEditableEepromField(row.original.id, 'model', row.original.model),
+        cell: ({ row }) => row.original.model ?? '—',
       },
       {
         accessorKey: 'serial',
         header: 'Serial',
-        cell: ({ row }) => renderEditableEepromField(row.original.id, 'serial', row.original.serial),
+        cell: ({ row }) => row.original.serial ?? '—',
       },
       {
         accessorKey: 'comments',
@@ -437,6 +368,15 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
             <Button size="sm" variant="ghost" onClick={() => onView(row.original.id)} aria-label={`View data for module ${row.original.id}`}>
               <Eye className="h-4 w-4" />
             </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setEditingModule({ id: row.original.id, name: row.original.name })}
+              aria-label={`Edit EEPROM fields of module ${row.original.id}`}
+              title="Edit vendor, part number, serial and other fields"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button size="sm" variant="default">
@@ -449,7 +389,7 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
                   <AlertDialogDescription>
                     Writing EEPROM can permanently damage your module if incorrect data is used. Make sure you have a backup and the
                     correct profile is selected. This only stages the data on the device - you must then confirm on the SFP Wizard&apos;s
-                    own screen to actually apply it to the module.
+                    own screen to actually apply it to the module. The checksums (bytes 63 and 95) are verified first.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -491,7 +431,7 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
         ),
       },
     ],
-    [onWrite, onDelete, onView, deletingId, editingField, fieldDraft, savingField, onSaveField, editingCommentsId, commentsDraft, savingCommentsId, onSaveComments]
+    [onWrite, onDelete, onView, deletingId, editingCommentsId, commentsDraft, savingCommentsId, onSaveComments]
   );
 
   const table = useReactTable({
@@ -654,6 +594,37 @@ export function ModuleTable({ initialModules, deploymentMode, initialError }: Mo
           <SfpDataViewer eepromData={viewingData} loading={viewingLoading} />
         </DialogContent>
       </Dialog>
+
+      <EepromEditorDialog module={editingModule} onClose={closeEditor} onSaved={load} />
+
+      <AlertDialog open={checksumProblem !== null} onOpenChange={(open) => !open && setChecksumProblem(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Module #{checksumProblem?.id} has wrong checksums</AlertDialogTitle>
+            <AlertDialogDescription>
+              {checksumProblem?.message}. A module written like this may not be recognised by the host. Repair fixes only
+              these two bytes, in the saved copy. Write anyway sends the data unchanged, for example to clone an
+              untouched factory read exactly.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const id = checksumProblem?.id;
+                setChecksumProblem(null);
+                if (id) void onWrite(id, true);
+              }}
+            >
+              Write anyway
+            </Button>
+            <AlertDialogAction onClick={() => checksumProblem && onRepairAndWrite(checksumProblem.id)}>
+              Repair and write
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
