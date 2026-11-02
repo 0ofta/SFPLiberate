@@ -147,7 +147,19 @@ let autoDetectInProgress = false;
 type MsgListener = { pattern: string | RegExp; resolve: (text: string) => void; reject: (e: any) => void; timeoutId: any };
 const listeners: MsgListener[] = [];
 
-export async function connect(selected: ConnectionMode) {
+/**
+ * The Web Bluetooth device picked most recently. Reconnecting to it skips the chooser,
+ * so Reconnect works in one click (and without a user gesture). Cleared if it fails.
+ */
+let rememberedDevice: any = null;
+
+/**
+ * Connect using the selected mode.
+ *
+ * @param device - Optional device just picked in the discovery chooser; direct mode
+ *   connects to it without opening a second chooser.
+ */
+export async function connect(selected: ConnectionMode, device?: any) {
   const mode = resolveConnectionMode(selected);
   setResolvedMode(mode);
   if (mode === 'none') {
@@ -157,7 +169,7 @@ export async function connect(selected: ConnectionMode) {
 
   if (mode === 'proxy') return connectViaProxy();
   if (mode === 'esphome-proxy') return connectViaESPHomeProxy();
-  return connectDirectMode();
+  return connectDirectMode(device ?? rememberedDevice ?? undefined);
 }
 
 function handleApiNotificationEvent(event: { target: { value: DataView } }) {
@@ -166,10 +178,20 @@ function handleApiNotificationEvent(event: { target: { value: DataView } }) {
   handleApiNotification(bytes);
 }
 
-async function connectDirectMode() {
-  logLine('Requesting BLE device...');
+async function connectDirectMode(knownDevice?: any) {
+  logLine(knownDevice ? `Connecting to ${knownDevice.name || 'SFP Wizard'}...` : 'Requesting BLE device...');
   const profile = requireProfile();
-  const { device, writeCharacteristic, deviceInfoCharacteristic, apiNotifyCharacteristic } = await connectDirect(profile, handleDisconnection);
+  let connection: Awaited<ReturnType<typeof connectDirect>>;
+  try {
+    connection = await connectDirect(profile, handleDisconnection, 10000, knownDevice);
+  } catch (e) {
+    // A remembered device that is off or out of range: forget it, so the next
+    // click opens the chooser again instead of failing the same way.
+    if (knownDevice && knownDevice === rememberedDevice) rememberedDevice = null;
+    throw e;
+  }
+  const { device, writeCharacteristic, deviceInfoCharacteristic, apiNotifyCharacteristic } = connection;
+  rememberedDevice = device;
   active = { mode: 'direct', write: writeCharacteristic, apiNotify: apiNotifyCharacteristic, proxy: null };
   await startNotifications(apiNotifyCharacteristic, handleApiNotificationEvent);
 

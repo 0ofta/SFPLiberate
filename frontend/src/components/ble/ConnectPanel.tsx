@@ -112,17 +112,17 @@ export function ConnectPanel() {
 
   /**
    * One Connect button for every case. When no BLE profile is saved yet (first use, Web
-   * Bluetooth), or `forceDiscover` is set, it opens the device chooser and saves the profile.
-   * Connecting needs a second chooser, and the browser only allows one per click, so the
-   * user is asked to click Connect once more instead of getting a confusing error.
+   * Bluetooth), or `forceDiscover` is set, it opens the device chooser, saves the profile
+   * and connects to the device picked there - one chooser, one click.
    */
   const onConnect = async (forceDiscover = false) => {
     setBusy(true);
     try {
       const direct = mode === 'auto' || mode === 'web-bluetooth';
       if (direct && (forceDiscover || !hasSavedProfile())) {
-        await discoverAndConnectSfpDevice();
-        toast.success('SFP Wizard found', { description: 'Click Connect once more to finish connecting.' });
+        const { device } = await discoverAndConnectSfpDevice();
+        await connect(mode, device);
+        toast.success('Connected');
         return;
       }
       await connect(mode);

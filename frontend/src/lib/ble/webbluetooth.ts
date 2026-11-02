@@ -39,18 +39,31 @@ export async function requestAnyDeviceChooser() {
   return await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
 }
 
-export async function connectDirect(profile: SfpProfile, onDisconnect?: () => void, timeout = 10000) {
-  const device: any = await withTimeout(
+/** Devices that already have our disconnect listener, so a reconnect does not add a second one. */
+const devicesWithDisconnectListener = new WeakSet<object>();
+
+/**
+ * Connect to the SFP Wizard over Web Bluetooth and look up its characteristics.
+ *
+ * @param knownDevice - A device the user already picked (from discovery or an earlier
+ *   connect). When given, no chooser is opened: the browser allows only one chooser per
+ *   click, and reconnecting to a known device needs no user gesture at all.
+ */
+export async function connectDirect(profile: SfpProfile, onDisconnect?: () => void, timeout = 10000, knownDevice?: any) {
+  const device: any = knownDevice ?? await withTimeout(
     requestDeviceWithFallback(profile.serviceUuid),
     timeout,
     'Device selection'
   );
 
-  device.addEventListener('gattserverdisconnected', () => {
-    if (onDisconnect) {
-      onDisconnect();
-    }
-  });
+  if (!devicesWithDisconnectListener.has(device)) {
+    devicesWithDisconnectListener.add(device);
+    device.addEventListener('gattserverdisconnected', () => {
+      if (onDisconnect) {
+        onDisconnect();
+      }
+    });
+  }
 
   const server: any = await withTimeout(
     device.gatt.connect(),

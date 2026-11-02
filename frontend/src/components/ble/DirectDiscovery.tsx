@@ -49,7 +49,7 @@ export function DirectDiscovery() {
 
       // Step 2: Connect using the discovered profile
       setStatus('Connecting to device...');
-      await connect('web-bluetooth' as ConnectionMode);
+      await connect('web-bluetooth' as ConnectionMode, device);
 
       toast.success('Connected successfully!', {
         description: `Connected to ${device.name || 'SFP Wizard'}`,

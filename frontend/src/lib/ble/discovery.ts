@@ -37,7 +37,8 @@ export async function discoverAndConnectSfpDevice(): Promise<DiscoveryResult> {
   // Step 3: Save profile for future use
   saveActiveProfile(profile);
 
-  // Step 4: Disconnect (caller will reconnect using the profile)
+  // Step 4: Disconnect. The caller reconnects by passing the returned device to
+  // connect(mode, device), which needs no second chooser.
   try {
     await device.gatt?.disconnect();
   } catch (e) {
