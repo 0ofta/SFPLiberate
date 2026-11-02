@@ -124,7 +124,7 @@ export class StandaloneRepository implements ModuleRepository {
       // Backend doesn't have a GET /modules/{id} endpoint, so we fetch all and filter
       // This is acceptable for standalone mode (typically < 100 modules)
       const modules = await this.listModules();
-      const foundModule = modules.find((m) => m.id === id);
+      const foundModule = modules.find((m) => m.id === String(id));
 
       if (!foundModule) {
         throw new Error(`Module with ID ${id} not found`);
