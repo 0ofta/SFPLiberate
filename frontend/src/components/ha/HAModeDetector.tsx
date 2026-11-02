@@ -79,15 +79,5 @@ export function HAModeDetector() {
   }
 
   // Standalone mode (Web Bluetooth or ESPHome proxy)
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>BLE Control</CardTitle>
-        <CardDescription>Connect, read EEPROM, save modules, and proxy discovery</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ConnectPanel />
-      </CardContent>
-    </Card>
-  );
+  return <ConnectPanel />;
 }

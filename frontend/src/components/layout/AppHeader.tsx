@@ -28,9 +28,8 @@ export function AppHeader() {
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6">
         <div className="mr-2 flex items-center gap-2">
           <Link href="/" className="text-base font-semibold hover:opacity-80">
-            SFPLiberate
+            SFP Sage
           </Link>
-          <span className="text-xs text-neutral-500">Next.js + shadcn</span>
         </div>
         <nav className="flex items-center gap-3 text-sm">
           <Link href="/" className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">

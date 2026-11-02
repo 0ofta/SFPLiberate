@@ -50,7 +50,7 @@ function SettingsContent() {
                         <CardHeader>
                             <CardTitle>Account Information</CardTitle>
                             <CardDescription>
-                                Your SFPLiberate account details
+                                Your SFP Sage account details
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">

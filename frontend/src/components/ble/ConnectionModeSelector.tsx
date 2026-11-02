@@ -38,9 +38,9 @@ export function ConnectionModeSelector(props: { value: ConnectionMode; onChange:
 
   return (
     <div className="flex items-center gap-3">
-      <Label htmlFor="connectionMode">Connection Mode</Label>
+      <Label htmlFor="connectionMode" className="sr-only">Connection mode</Label>
       <Select value={props.value} onValueChange={(v) => props.onChange(v as ConnectionMode)}>
-        <SelectTrigger id="connectionMode" className="w-[200px]">
+        <SelectTrigger id="connectionMode" className="h-8 w-[150px] text-xs">
           <SelectValue placeholder="Select" />
         </SelectTrigger>
         <SelectContent>
