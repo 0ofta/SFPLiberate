@@ -1,6 +1,6 @@
 # Environment Variables Reference
 
-This document lists all environment variables used in SFP Vault.
+This document lists all environment variables used in SFP vault.
 
 ## Quick Reference
 
@@ -322,4 +322,4 @@ Set these in **GitHub Repository Settings > Secrets and variables > Actions**:
 - [Next.js Environment Variables](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables)
 - [Appwrite Sites Environment Variables](https://appwrite.io/docs/products/sites/develop#appwrite-specific-environment-variables)
 - [Docker Compose Environment Variables](https://docs.docker.com/compose/environment-variables/)
-- [SFP Vault Deployment Guide](./APPWRITE_SITES_DEPLOYMENT.md)
+- [SFP vault Deployment Guide](./APPWRITE_SITES_DEPLOYMENT.md)

@@ -9,7 +9,7 @@
 
 ## What We're Building
 
-A **zero-configuration Bluetooth proxy system** that allows SFP Vault to discover and connect to SFP Wizard devices via ESPHome Bluetooth proxies on the local network, eliminating the need for direct BLE hardware access from Docker containers.
+A **zero-configuration Bluetooth proxy system** that allows SFP vault to discover and connect to SFP Wizard devices via ESPHome Bluetooth proxies on the local network, eliminating the need for direct BLE hardware access from Docker containers.
 
 ---
 

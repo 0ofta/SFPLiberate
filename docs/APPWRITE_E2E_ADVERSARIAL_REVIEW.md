@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This review examines the entire Appwrite end-to-end configuration for **SFP Vault**, covering authentication, authorization, infrastructure configuration, and deployment security. The implementation was evaluated against Appwrite's latest security best practices and common misconfiguration patterns.
+This review examines the entire Appwrite end-to-end configuration for **SFP vault**, covering authentication, authorization, infrastructure configuration, and deployment security. The implementation was evaluated against Appwrite's latest security best practices and common misconfiguration patterns.
 
 ### Overall Security Posture: 🟡 MODERATE
 
@@ -1048,12 +1048,12 @@ Document and verify CORS settings in Appwrite Console:
 ```
 Settings > Platforms > Add Platform
   - Type: Web
-  - Name: SFP Vault Production
+  - Name: SFP vault Production
   - Hostname: sfplib.com
 
 Settings > Platforms > Add Platform
   - Type: Web
-  - Name: SFP Vault Development
+  - Name: SFP vault Development
   - Hostname: localhost
 ```
 

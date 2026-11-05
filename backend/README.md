@@ -1,6 +1,6 @@
-# SFP Vault Backend
+# SFP vault Backend
 
-FastAPI backend for SFP Vault that manages the SFP module library. Supports two deployment modes with automatic database adapter selection.
+FastAPI backend for SFP vault that manages the SFP module library. Supports two deployment modes with automatic database adapter selection.
 
 ---
 

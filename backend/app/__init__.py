@@ -1,3 +1,3 @@
-"""SFP Vault Backend Application."""
+"""SFP vault Backend Application."""
 
 __version__ = "1.0.0"

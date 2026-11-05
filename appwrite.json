@@ -5,7 +5,7 @@
   "databases": [
     {
       "$id": "lib-core",
-      "name": "SFP Vault Database",
+      "name": "SFP vault Database",
       "enabled": true
     }
   ],

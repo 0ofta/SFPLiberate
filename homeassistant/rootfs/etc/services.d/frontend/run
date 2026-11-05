@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 set -e
 
-bashio::log.info "Starting SFP Vault Next.js frontend..."
+bashio::log.info "Starting SFP vault Next.js frontend..."
 
 # Validate frontend directory exists
 if [[ ! -d /app/frontend ]]; then

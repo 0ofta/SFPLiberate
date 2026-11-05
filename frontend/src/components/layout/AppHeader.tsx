@@ -35,7 +35,7 @@ export function AppHeader() {
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6">
         <div className="mr-2 flex items-center gap-2">
           <Link href="/" className="text-base font-semibold hover:opacity-80">
-            SFP Vault
+            SFP vault
           </Link>
         </div>
         <nav className="flex items-center gap-1 text-sm">

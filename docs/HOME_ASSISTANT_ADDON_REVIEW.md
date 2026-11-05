@@ -13,7 +13,7 @@
 
 ## Executive Summary
 
-The SFP Vault Home Assistant add-on demonstrates **solid implementation** with good adherence to HA best practices. The add-on properly leverages Supervisor APIs, implements ingress correctly, and follows configuration schema standards.
+The SFP vault Home Assistant add-on demonstrates **solid implementation** with good adherence to HA best practices. The add-on properly leverages Supervisor APIs, implements ingress correctly, and follows configuration schema standards.
 
 ### Overall Rating: ⭐⭐⭐⭐☆ (4/5)
 
@@ -90,7 +90,7 @@ homeassistant/logo.png
 ```
 
 **Recommendation:**
-- Landscape version of icon + "SFP Vault" text
+- Landscape version of icon + "SFP vault" text
 - Or omit if logo is same as icon (icon is used as fallback)
 
 ---
@@ -123,7 +123,7 @@ homeassistant/screenshots/
 
 ### 2. Naming and Descriptions
 
-#### ✅ **Name: "SFP Vault"**
+#### ✅ **Name: "SFP vault"**
 
 **Compliance:** ✅ Good
 - Unique, memorable
@@ -164,7 +164,7 @@ description: "Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and 
 ingress: true
 ingress_port: 3000
 panel_icon: mdi:ethernet
-panel_title: SFP Vault
+panel_title: SFP vault
 ```
 
 **Compliance:** ✅ Perfect
@@ -199,7 +199,7 @@ homeassistant/config.json
 **Format:**
 ```json
 {
-  "name": "SFP Vault",
+  "name": "SFP vault",
   "version": "1.0.0",
   "slug": "sfpvault",
   "description": "...",
@@ -210,7 +210,7 @@ homeassistant/config.json
   "ingress": true,
   "ingress_port": 3000,
   "panel_icon": "mdi:ethernet",
-  "panel_title": "SFP Vault",
+  "panel_title": "SFP vault",
   "host_dbus": true,
   "hassio_role": "default",
   "hassio_api": true,
@@ -391,7 +391,7 @@ boot: auto         # ✅ Start automatically on boot
 **Current:**
 ```json
 {
-  "name": "SFP Vault Add-on Repository",
+  "name": "SFP vault Add-on Repository",
   "url": "https://github.com/josiah-nelson/SFPLiberate",
   "maintainer": "Josiah Nelson"
 }
@@ -405,7 +405,7 @@ boot: auto         # ✅ Start automatically on boot
 **Recommendation:**
 ```json
 {
-  "name": "SFP Vault Add-on Repository",
+  "name": "SFP vault Add-on Repository",
   "url": "https://github.com/josiah-nelson/SFPLiberate",
   "maintainer": "Josiah Nelson <josiah@example.com>"
 }
@@ -414,7 +414,7 @@ boot: auto         # ✅ Start automatically on boot
 **Optional Fields to Add:**
 ```json
 {
-  "name": "SFP Vault Add-on Repository",
+  "name": "SFP vault Add-on Repository",
   "url": "https://github.com/josiah-nelson/SFPLiberate",
   "maintainer": "Josiah Nelson <josiah@example.com>",
   "homeassistant": "2024.1.0",  // Minimum HA version
@@ -579,7 +579,7 @@ export AUTO_DISCOVER=$(bashio::config 'auto_discover')
 #!/usr/bin/with-contenv bashio
 
 # More Bashio helpers
-bashio::log.info "Starting SFP Vault Home Assistant Add-On..."
+bashio::log.info "Starting SFP vault Home Assistant Add-On..."
 
 # Check if Bluetooth integration is available
 if ! bashio::api.supervisor GET /core/api/states | jq -e '.[] | select(.entity_id | startswith("sensor.bluetooth"))' > /dev/null; then
@@ -727,7 +727,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
 
 ```dockerfile
 LABEL \
-    io.hass.name="SFP Vault" \
+    io.hass.name="SFP vault" \
     io.hass.description="Bluetooth companion for Ubiquiti SFP Wizard" \
     io.hass.arch="aarch64|amd64|armhf|armv7" \
     io.hass.type="addon" \
@@ -934,7 +934,7 @@ configuration:
 - ✅ Extensive Bashio usage
 - ✅ Health checks + watchdog
 
-**What SFP Vault matches:**
+**What SFP vault matches:**
 - ✅ Multi-architecture support
 - ✅ Comprehensive DOCS.md
 - ✅ Proper ingress configuration
@@ -955,7 +955,7 @@ configuration:
 - ✅ Active community support
 - ✅ Frequent updates in CHANGELOG
 
-**What SFP Vault matches:**
+**What SFP vault matches:**
 - ✅ Clear documentation
 - ✅ Good startup configuration
 - ✅ Proper API access
@@ -973,7 +973,7 @@ configuration:
 - ✅ Version badges in README
 - ✅ Community links (Discord, forum)
 
-**What SFP Vault matches:**
+**What SFP vault matches:**
 - ✅ Comprehensive troubleshooting section
 - ✅ FAQ section
 - ✅ Clear installation steps
@@ -1049,7 +1049,7 @@ configuration:
 
 ### Overall Assessment
 
-The SFP Vault Home Assistant add-on is **well-architected and functional**, demonstrating solid understanding of HA add-on best practices. The implementation correctly uses:
+The SFP vault Home Assistant add-on is **well-architected and functional**, demonstrating solid understanding of HA add-on best practices. The implementation correctly uses:
 - ✅ Ingress for web UI
 - ✅ Supervisor API for Bluetooth access
 - ✅ Multi-architecture Docker builds

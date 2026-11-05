@@ -1,6 +1,6 @@
-# SFP Vault Deployment Guide
+# SFP vault Deployment Guide
 
-Complete guide for deploying SFP Vault in production and development environments.
+Complete guide for deploying SFP vault in production and development environments.
 
 ---
 
@@ -56,7 +56,7 @@ The old `sfpliberate_backend_data` volume is kept; remove it with `docker volume
 ```bash
 # Clone repository
 git clone https://github.com/0ofta/SFPLiberate.git
-cd SFP Vault
+cd SFP vault
 
 # Start production environment
 make prod
@@ -643,7 +643,7 @@ Already configured in `.github/workflows/ci.yml`:
 ```bash
 # On your server
 git clone https://github.com/0ofta/SFPLiberate.git
-cd SFP Vault
+cd SFP vault
 cp .env.example .env
 # Edit .env with production settings
 make deploy

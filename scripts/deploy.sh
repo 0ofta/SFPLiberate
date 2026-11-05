@@ -1,5 +1,5 @@
 #!/bin/bash
-# Production Deployment Script for SFP Vault
+# Production Deployment Script for SFP vault
 # Usage: ./scripts/deploy.sh [options]
 #
 # Options:
@@ -306,7 +306,7 @@ cleanup() {
 main() {
   echo ""
   echo "╔════════════════════════════════════════════════╗"
-  echo "║   SFP Vault Production Deployment Script    ║"
+  echo "║   SFP vault Production Deployment Script    ║"
   echo "╚════════════════════════════════════════════════╝"
   echo ""
   

@@ -2,7 +2,7 @@
   "$schema": "https://appwrite.io/schemas/appwrite.json",
   "projectId": "${APPWRITE_PROJECT_ID}",
   "endpoint": "${APPWRITE_ENDPOINT}",
-  "projectName": "SFP Vault",
+  "projectName": "SFP vault",
   "settings": {
     "services": {
       "account": true,
@@ -22,7 +22,7 @@
   "sites": [
     {
       "$id": "sfpvault",
-      "name": "SFP Vault",
+      "name": "SFP vault",
       "enabled": true,
       "logging": true,
       "framework": "nextjs",

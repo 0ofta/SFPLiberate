@@ -1,4 +1,4 @@
-name: "SFP Vault"
+name: "SFP vault"
 version: "0.3.0"
 slug: "sfpvault"
 description: "Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and manage SFP module EEPROM profiles"
@@ -18,7 +18,7 @@ ingress: true
 ingress_port: 3000
 ingress_entry: "/"
 panel_icon: mdi:ethernet
-panel_title: SFP Vault
+panel_title: SFP vault
 webui: "http://[HOST]:[PORT:3000]"
 
 # Bluetooth access required

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # API
     api_v1_prefix: str = "/api/v1"
-    project_name: str = "SFP Vault API"
+    project_name: str = "SFP vault API"
     version: str = "1.0.0"
 
     # CORS

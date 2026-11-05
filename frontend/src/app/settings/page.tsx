@@ -49,7 +49,7 @@ function SettingsContent() {
                         <CardHeader>
                             <CardTitle>Account Information</CardTitle>
                             <CardDescription>
-                                Your SFP Vault account details
+                                Your SFP vault account details
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">

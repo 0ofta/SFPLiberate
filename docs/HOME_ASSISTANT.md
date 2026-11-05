@@ -1,10 +1,10 @@
-# SFP Vault Home Assistant Add-On
+# SFP vault Home Assistant Add-On
 
-Complete guide to installing, configuring, and using the SFP Vault Home Assistant Add-On.
+Complete guide to installing, configuring, and using the SFP vault Home Assistant Add-On.
 
 ## Overview
 
-The SFP Vault Home Assistant Add-On provides the easiest way to use SFP Vault with your Ubiquiti SFP Wizard. It integrates directly with Home Assistant's Bluetooth infrastructure, automatically discovers devices, and requires zero Docker knowledge.
+The SFP vault Home Assistant Add-On provides the easiest way to use SFP vault with your Ubiquiti SFP Wizard. It integrates directly with Home Assistant's Bluetooth infrastructure, automatically discovers devices, and requires zero Docker knowledge.
 
 ## Installation
 
@@ -20,7 +20,7 @@ The SFP Vault Home Assistant Add-On provides the easiest way to use SFP Vault wi
 
    [![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2F0ofta%2FSFPLiberate)
 
-2. Install the "SFP Vault" add-on
+2. Install the "SFP vault" add-on
 3. (Optional) Configure settings in the Configuration tab
 4. Click **START**
 5. Wait for startup to complete (check logs if needed)
@@ -34,7 +34,7 @@ If the button doesn't work:
 2. Click the **⋮** menu → **Repositories**
 3. Add: `https://github.com/0ofta/SFPLiberate`
 4. Refresh the add-on store
-5. Find "SFP Vault" and click **INSTALL**
+5. Find "SFP vault" and click **INSTALL**
 
 ## Configuration
 
@@ -103,7 +103,7 @@ If your Home Assistant host has a built-in Bluetooth adapter:
 2. Click **+ ADD INTEGRATION**
 3. Search for "Bluetooth"
 4. Follow setup wizard
-5. Start the SFP Vault add-on
+5. Start the SFP vault add-on
 
 The add-on will automatically use the host adapter.
 
@@ -113,7 +113,7 @@ Shelly Plus devices with Bluetooth also work:
 
 1. Ensure Shelly device is integrated in HA
 2. Enable Bluetooth on the Shelly (check Shelly docs)
-3. Restart the SFP Vault add-on
+3. Restart the SFP vault add-on
 4. Devices will appear automatically
 
 ## Usage
@@ -168,7 +168,7 @@ Your SFP library is **automatically included** in Home Assistant backups:
 
 1. Go to **Settings** → **System** → **Backups**
 2. Click **CREATE BACKUP**
-3. Your SFP Vault data is included
+3. Your SFP vault data is included
 
 ### Manual Backup
 
@@ -187,11 +187,11 @@ cp /backup/sfp_library_20250101.db /config/sfpvault/sfp_library.db
 
 ### Upgrading from SFPLiberate (add-on 0.2.x)
 
-The add-on was renamed to SFP Vault in 0.3.0 and has a new slug (`sfpvault`), so Home
+The add-on was renamed to SFP vault in 0.3.0 and has a new slug (`sfpvault`), so Home
 Assistant lists it as a separate add-on.
 
 1. Stop the old **SFPLiberate** add-on, so its database is not in use during the copy.
-2. Install **SFP Vault** from the add-on store and start it.
+2. Install **SFP vault** from the add-on store and start it.
 3. On first start it copies `/config/sfpliberate/` to `/config/sfpvault/`. The old folder
    is left untouched.
 4. Check that your modules are there, then uninstall the old **SFPLiberate** add-on.
@@ -222,7 +222,7 @@ Coming soon: Export/import feature will allow seamless migration from standalone
    - Restart add-on
 5. **Enable debug logging:**
    - Configuration → `log_level: debug`
-   - Check logs: Settings → Add-ons → SFP Vault → Logs
+   - Check logs: Settings → Add-ons → SFP vault → Logs
 
 ### Connection timeout
 
@@ -252,7 +252,7 @@ Coming soon: Export/import feature will allow seamless migration from standalone
 
 **Solutions:**
 1. **Check add-on is running:**
-   - Settings → Add-ons → SFP Vault
+   - Settings → Add-ons → SFP vault
    - Status should show "Started"
 2. **Review add-on logs:**
    - Click **Log** tab
@@ -287,7 +287,7 @@ Coming soon: Export/import feature will allow seamless migration from standalone
 
 ### Custom device names not matching
 
-**Symptom:** Device appears in HA but not in SFP Vault
+**Symptom:** Device appears in HA but not in SFP vault
 
 **Solution:**
 1. Find device in HA:
@@ -340,7 +340,7 @@ log_level: debug
 ```
 
 **Log locations:**
-- Add-on logs: Settings → Add-ons → SFP Vault → Logs
+- Add-on logs: Settings → Add-ons → SFP vault → Logs
 - System logs: Settings → System → Logs
 
 **What to look for:**

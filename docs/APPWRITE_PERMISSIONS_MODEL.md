@@ -7,7 +7,7 @@
 
 ## Overview
 
-SFP Vault uses a **hybrid permission model** combining:
+SFP vault uses a **hybrid permission model** combining:
 1. **Collection-level permissions** for community resources (alpha/admin roles)
 2. **Document-level permissions** for user resources (per-user access)
 3. **Bucket-level permissions** for community files (alpha/admin can read)

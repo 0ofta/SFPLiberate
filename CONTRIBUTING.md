@@ -1,6 +1,6 @@
-# Contributing to SFP Vault
+# Contributing to SFP vault
 
-Thanks for your interest in contributing to SFP Vault! We welcome contributions from the community, whether it's bug fixes, new features, documentation improvements, or BLE protocol discoveries.
+Thanks for your interest in contributing to SFP vault! We welcome contributions from the community, whether it's bug fixes, new features, documentation improvements, or BLE protocol discoveries.
 
 **Priority Areas:**
 - Reverse-engineering and implementing the SFP write path via BLE
@@ -32,7 +32,7 @@ Thanks for your interest in contributing to SFP Vault! We welcome contributions 
 ```bash
 # Clone the repository
 git clone https://github.com/0ofta/SFPLiberate.git
-cd SFP Vault
+cd SFP vault
 
 # Start the full stack
 docker-compose up --build
@@ -513,4 +513,4 @@ By contributing, you agree that your contributions will be licensed under the sa
 - Review existing issues and PRs for context
 - Open a discussion or issue if stuck
 
-**Thank you for contributing to SFP Vault!** 🚀
+**Thank you for contributing to SFP vault!** 🚀

@@ -158,7 +158,7 @@ jobs:
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           echo "{
-            \"name\": \"SFP Vault Add-on Repository\",
+            \"name\": \"SFP vault Add-on Repository\",
             \"url\": \"https://github.com/${{ github.repository }}\",
             \"maintainer\": \"${{ github.repository_owner }}\",
             \"last_updated\": \"$TIMESTAMP\"

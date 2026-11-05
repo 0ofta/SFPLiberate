@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 set -e
 
-bashio::log.info "Starting SFP Vault FastAPI backend..."
+bashio::log.info "Starting SFP vault FastAPI backend..."
 
 # Validate backend directory exists
 if [[ ! -d /app/backend ]]; then

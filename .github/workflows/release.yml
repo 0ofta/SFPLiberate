@@ -178,9 +178,9 @@ jobs:
 
             # Write first release notes using heredoc
             cat > release-notes.md <<-EOF
-          ## SFP Vault v${VERSION}
+          ## SFP vault v${VERSION}
 
-          This is the first release of the SFP Vault Home Assistant add-on.
+          This is the first release of the SFP vault Home Assistant add-on.
 
           ### Installation
 
@@ -189,7 +189,7 @@ jobs:
              https://github.com/${REPO}
              \`\`\`
 
-          2. Install the **SFP Vault** add-on from the add-on store
+          2. Install the **SFP vault** add-on from the add-on store
 
           3. Configure your settings and start the add-on
 
@@ -215,7 +215,7 @@ jobs:
 
             # Write incremental release notes using heredoc
             cat > release-notes.md <<-EOF
-          ## SFP Vault v${VERSION}
+          ## SFP vault v${VERSION}
 
           ### Changes Since $PREV_TAG
 
@@ -228,7 +228,7 @@ jobs:
              https://github.com/${REPO}
              \`\`\`
 
-          2. Go to Add-ons -> Add-on Store -> SFP Vault
+          2. Go to Add-ons -> Add-on Store -> SFP vault
           3. Click Install (or Update if already installed)
 
           ### Documentation
@@ -284,7 +284,7 @@ jobs:
           After builds complete:
           1. Go to Home Assistant → Settings → Add-ons → Add-on Store
           2. Add repository: \`https://github.com/${{ github.repository }}\`
-          3. Install **SFP Vault** add-on
+          3. Install **SFP vault** add-on
           4. Verify version shows as \`$VERSION\`
 
           ### Monitor Build Progress

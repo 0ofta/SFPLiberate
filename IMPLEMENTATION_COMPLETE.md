@@ -5,7 +5,7 @@
 
 ## Executive Summary
 
-The SFP Vault backend has been successfully modernized from a working prototype to a production-ready application following current industry best practices. This comprehensive refactoring provides:
+The SFP vault backend has been successfully modernized from a working prototype to a production-ready application following current industry best practices. This comprehensive refactoring provides:
 
 - **Type Safety:** 100% type coverage with Python type hints
 - **Testing:** 70%+ code coverage with unit and integration tests

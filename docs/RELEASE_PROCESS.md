@@ -1,6 +1,6 @@
 # Release Process
 
-This document describes how to create releases for the SFP Vault Home Assistant add-on.
+This document describes how to create releases for the SFP vault Home Assistant add-on.
 
 ## Overview
 

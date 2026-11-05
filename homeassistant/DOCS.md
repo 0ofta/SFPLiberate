@@ -1,18 +1,18 @@
-# SFP Vault Home Assistant Add-On Documentation
+# SFP vault Home Assistant Add-On Documentation
 
 ## Overview
 
-SFP Vault is a Home Assistant add-on that provides a web-based interface for managing SFP module EEPROM profiles using the Ubiquiti SFP Wizard (UACC-SFP-Wizard).
+SFP vault is a Home Assistant add-on that provides a web-based interface for managing SFP module EEPROM profiles using the Ubiquiti SFP Wizard (UACC-SFP-Wizard).
 
 ## Installation
 
-1. Add the SFP Vault repository to Home Assistant:
+1. Add the SFP vault repository to Home Assistant:
    - Click the "Add to Home Assistant" button in the README
    - OR manually add: `https://github.com/0ofta/SFPLiberate`
 
 2. Install the add-on:
    - Settings → Add-ons → Add-on Store
-   - Find "SFP Vault"
+   - Find "SFP vault"
    - Click Install
 
 3. Start the add-on:
@@ -184,7 +184,7 @@ This location ensures:
 **Symptom:** "Unable to connect" or blank page
 
 **Solutions:**
-1. Check add-on is running: Settings → Add-ons → SFP Vault
+1. Check add-on is running: Settings → Add-ons → SFP vault
 2. Review add-on logs for errors
 3. Restart the add-on
 4. Restart Home Assistant if add-on won't start
@@ -229,7 +229,7 @@ To troubleshoot issues:
 log_level: debug
 ```
 
-Then check logs: Settings → Add-ons → SFP Vault → Logs
+Then check logs: Settings → Add-ons → SFP vault → Logs
 
 ## Backups & Restore
 
@@ -328,11 +328,11 @@ MIT License - see repository for full text.
 
 ## Upgrading from SFPLiberate (add-on 0.2.x)
 
-The add-on was renamed to SFP Vault in 0.3.0 and has a new slug (`sfpvault`), so Home
+The add-on was renamed to SFP vault in 0.3.0 and has a new slug (`sfpvault`), so Home
 Assistant lists it as a separate add-on.
 
 1. Stop the old **SFPLiberate** add-on, so its database is not in use during the copy.
-2. Install **SFP Vault** from the add-on store and start it.
+2. Install **SFP vault** from the add-on store and start it.
 3. On first start it copies `/config/sfpliberate/` to `/config/sfpvault/`. The old folder
    is left untouched.
 4. Check that your modules are there, then uninstall the old **SFPLiberate** add-on.

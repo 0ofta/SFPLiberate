@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the SFP Vault Home Assistant Add-On will be documented in this file.
+All notable changes to the SFP vault Home Assistant Add-On will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2026-11-05
 
 ### Changed
-- **Renamed to SFP Vault** (forked from SFPLiberate). The add-on slug is now `sfpvault`,
-  so Home Assistant sees it as a new add-on: install "SFP Vault", then uninstall the old
+- **Renamed to SFP vault** (forked from SFPLiberate). The add-on slug is now `sfpvault`,
+  so Home Assistant sees it as a new add-on: install "SFP vault", then uninstall the old
   "SFPLiberate" add-on.
 - Data now lives in `/config/sfpvault/`. On first start the add-on copies an existing
   `/config/sfpliberate/` there; the old folder is kept and can be deleted by hand later.

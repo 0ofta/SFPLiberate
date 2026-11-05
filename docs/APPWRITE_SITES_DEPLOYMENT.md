@@ -1,6 +1,6 @@
 # Appwrite Sites Deployment Guide
 
-This guide covers deployment of SFP Vault to Appwrite Cloud using **Appwrite Sites** with Git Auto-Deploy integration.
+This guide covers deployment of SFP vault to Appwrite Cloud using **Appwrite Sites** with Git Auto-Deploy integration.
 
 ## Table of Contents
 
@@ -65,7 +65,7 @@ Before deploying, ensure you have:
 1. Log in to [Appwrite Cloud Console](https://cloud.appwrite.io)
 2. Click **"Create Project"**
 3. Enter project details:
-   - **Name**: SFP Vault
+   - **Name**: SFP vault
    - **Region**: Choose closest to your users
 4. Note your **Project ID** (e.g., `65abc123def456`)
 
@@ -74,7 +74,7 @@ Before deploying, ensure you have:
 1. Navigate to **Sites** in the left sidebar
 2. Click **"Create Site"**
 3. Configure site:
-   - **Name**: SFP Vault Frontend
+   - **Name**: SFP vault Frontend
    - **Framework**: Next.js
    - **Build Command**: `npm run build`
    - **Output Directory**: `out`
@@ -86,14 +86,14 @@ After creating the site, note the **Site ID** from the site settings. You'll nee
 
 ## Database Schema Configuration
 
-SFP Vault requires the following database structure:
+SFP vault requires the following database structure:
 
 ### 1. Create Database
 
 1. Go to **Databases** in the Appwrite Console
 2. Click **"Create Database"**
 3. Database ID: `sfpvault`
-4. Name: `SFP Vault Database`
+4. Name: `SFP vault Database`
 
 ### 2. Create Collections
 
@@ -329,7 +329,7 @@ These are provided automatically and **do not need** to be configured:
 ```bash
 APPWRITE_SITE_API_ENDPOINT=https://cloud.appwrite.io/v1
 APPWRITE_SITE_PROJECT_ID=your_project_id
-APPWRITE_SITE_NAME=SFP Vault Frontend
+APPWRITE_SITE_NAME=SFP vault Frontend
 APPWRITE_SITE_DEPLOYMENT=deployment_id
 APPWRITE_SITE_RUNTIME_NAME=node
 APPWRITE_SITE_RUNTIME_VERSION=22
@@ -569,4 +569,4 @@ For issues or questions:
 
 **Last Updated**: January 2025
 **Appwrite Version**: 1.6+
-**Maintained By**: SFP Vault Team
+**Maintained By**: SFP vault Team

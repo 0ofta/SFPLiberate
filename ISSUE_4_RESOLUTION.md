@@ -2,7 +2,7 @@
 
 ## Summary
 
-Issue #4 "Investigate SFP Write Protocol via BLE" has been **successfully resolved**. The BLE write protocol has been reverse-engineered, documented, and fully implemented in the SFP Vault application.
+Issue #4 "Investigate SFP Write Protocol via BLE" has been **successfully resolved**. The BLE write protocol has been reverse-engineered, documented, and fully implemented in the SFP vault application.
 
 ## What Was Accomplished
 

@@ -1,8 +1,8 @@
-# **SFP Vault Home Assistant Add-On - Implementation Plan**
+# **SFP vault Home Assistant Add-On - Implementation Plan**
 
 ## **Executive Summary**
 
-This plan outlines the implementation of SFP Vault as a Home Assistant Add-On, providing a simplified deployment method that leverages HA's native Bluetooth infrastructure. The add-on will maintain the core functionality of the standalone Docker deployment while greatly simplifying setup, Bluetooth discovery, and ESPHome integration.
+This plan outlines the implementation of SFP vault as a Home Assistant Add-On, providing a simplified deployment method that leverages HA's native Bluetooth infrastructure. The add-on will maintain the core functionality of the standalone Docker deployment while greatly simplifying setup, Bluetooth discovery, and ESPHome integration.
 
 ---
 
@@ -35,7 +35,7 @@ Create a new `/sfpvault` directory at the root of the repository:
 
 #### **config.yaml** (Add-on Configuration)
 ```yaml
-name: "SFP Vault"
+name: "SFP vault"
 version: "1.0.0"
 slug: "sfpvault"
 description: "Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and manage SFP module EEPROM profiles"
@@ -52,7 +52,7 @@ boot: auto
 ingress: true
 ingress_port: 3000
 panel_icon: mdi:ethernet
-panel_title: SFP Vault
+panel_title: SFP vault
 
 # Bluetooth access required
 host_dbus: true
@@ -116,7 +116,7 @@ export ESPHOME_PROXY_MODE="false"  # We use HA Bluetooth API instead
 export HA_ADDON_MODE="true"
 
 # Start services via s6-overlay
-bashio::log.info "Starting SFP Vault Home Assistant Add-On..."
+bashio::log.info "Starting SFP vault Home Assistant Add-On..."
 ```
 
 ---
@@ -140,7 +140,7 @@ bashio::log.info "Starting SFP Vault Home Assistant Add-On..."
 Create `/backend/app/services/ha_bluetooth/ha_bluetooth_client.py`:
 
 ```python
-"""Home Assistant Bluetooth API client for SFP Vault add-on."""
+"""Home Assistant Bluetooth API client for SFP vault add-on."""
 
 import asyncio
 import logging
@@ -513,7 +513,7 @@ ingress_port: 3000
 
 This exposes the frontend at:
 - **Internal:** `http://homeassistant.local:8123/api/hassio_ingress/<token>/`
-- **User-facing:** Settings → Add-ons → SFP Vault → OPEN WEB UI
+- **User-facing:** Settings → Add-ons → SFP vault → OPEN WEB UI
 
 ### **5.2 Frontend Routing Adjustments**
 
@@ -551,7 +551,7 @@ Create a **repository.json** file (for HA add-on repository):
 
 ```json
 {
-  "name": "SFP Vault Add-on Repository",
+  "name": "SFP vault Add-on Repository",
   "url": "https://github.com/josiah-nelson/SFPLiberate",
   "maintainer": "Josiah Nelson <josiah@example.com>"
 }
@@ -573,7 +573,7 @@ docker-compose up --build
 [![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fjosiah-nelson%2FSFPLiberate)
 
 1. Click the button above (or add repository manually: `https://github.com/josiah-nelson/SFPLiberate`)
-2. Install the "SFP Vault" add-on
+2. Install the "SFP vault" add-on
 3. Start the add-on
 4. Click "OPEN WEB UI"
 ```
@@ -632,7 +632,7 @@ Users can configure the add-on via HA UI:
 ### **7.2 UI Configuration Panel**
 
 Users can access this via:
-1. Settings → Add-ons → SFP Vault → Configuration tab
+1. Settings → Add-ons → SFP vault → Configuration tab
 2. Edit YAML or use the form-based UI
 
 ---
@@ -746,7 +746,7 @@ async def test_device_discovery(mock_ha_api):
 
 Use a test Home Assistant instance:
 1. Install HA in dev mode (devcontainer)
-2. Add SFP Vault repository
+2. Add SFP vault repository
 3. Install add-on
 4. Test BLE device discovery with real SFP Wizard
 
@@ -758,7 +758,7 @@ Use a test Home Assistant instance:
 
 Create `/docs/HOME_ASSISTANT.md`:
 ```markdown
-# SFP Vault Home Assistant Add-On
+# SFP vault Home Assistant Add-On
 
 ## Installation
 
@@ -1046,7 +1046,7 @@ The HA add-on will be considered successful when:
 
 ## **17. Conclusion**
 
-This implementation plan provides a complete roadmap for porting SFP Vault to a Home Assistant Add-On. The architecture leverages HA's native Bluetooth infrastructure to eliminate complex setup (mDNS, manual proxy configuration) while maintaining full functionality.
+This implementation plan provides a complete roadmap for porting SFP vault to a Home Assistant Add-On. The architecture leverages HA's native Bluetooth infrastructure to eliminate complex setup (mDNS, manual proxy configuration) while maintaining full functionality.
 
 **Key Advantages:**
 - **Simplified deployment** - One-click install for HA users

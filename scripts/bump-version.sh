@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # =============================================================================
-# Version Bump Script for SFP Vault Add-on
+# Version Bump Script for SFP vault Add-on
 # =============================================================================
 #
 # Updates the version in homeassistant/config.yaml

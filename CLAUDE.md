@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**SFP Vault** is a Web Bluetooth companion app for the Ubiquiti SFP Wizard (UACC-SFP-Wizard) that captures SFP/SFP+ module EEPROM data over BLE, stores it in a local library, and enables cloning/reprogramming modules.
+**SFP vault** is a Web Bluetooth companion app for the Ubiquiti SFP Wizard (UACC-SFP-Wizard) that captures SFP/SFP+ module EEPROM data over BLE, stores it in a local library, and enables cloning/reprogramming modules.
 
 **Architecture:**
 - **Frontend:** Next.js 16 (App Router) + TypeScript + React 19 + shadcn/ui
@@ -202,7 +202,7 @@ docker-compose logs -f backend     # View backend logs
 - `SUPERVISOR_TOKEN` (provided by HA)
 
 **Configuration:**
-Users configure via HA UI (Settings → Add-ons → SFP Vault → Configuration):
+Users configure via HA UI (Settings → Add-ons → SFP vault → Configuration):
 - `log_level`: Logging verbosity
 - `auto_discover`: Enable/disable auto-discovery
 - `device_name_patterns`: List of patterns to match (e.g., ["SFP", "Wizard"])
@@ -243,7 +243,7 @@ POST /api/v1/ha-bluetooth/connect   # Connect & get UUIDs
 **Ingress Integration:**
 - Add-on exposes frontend at port 3000
 - HA's ingress proxy handles authentication & routing
-- Users access via Settings → Add-ons → SFP Vault → OPEN WEB UI
+- Users access via Settings → Add-ons → SFP vault → OPEN WEB UI
 - No port configuration needed
 
 ---

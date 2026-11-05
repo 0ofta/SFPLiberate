@@ -1,4 +1,4 @@
-"""Home Assistant Bluetooth API client for SFP Vault add-on."""
+"""Home Assistant Bluetooth API client for SFP vault add-on."""
 
 import asyncio
 import json

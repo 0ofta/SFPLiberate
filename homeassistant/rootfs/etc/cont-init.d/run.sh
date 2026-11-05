@@ -21,7 +21,7 @@ export SUBMISSIONS_DIR="/config/sfpvault/submissions"
 export DATA_DIR="/config/sfpvault"
 export BACKUP_DIR="/config/sfpvault/backups"
 
-# One-time migration from the old SFPLiberate data folder (renamed to SFP Vault in 0.3.0).
+# One-time migration from the old SFPLiberate data folder (renamed to SFP vault in 0.3.0).
 # The old folder is COPIED, never moved or deleted, so a rollback to the old add-on keeps
 # working. Copy into a temp folder first and rename it at the end, so a half-finished copy
 # is never mistaken for a finished one.
@@ -30,7 +30,7 @@ if [[ -d "${LEGACY_DATA_DIR}" && ! -e "${DATA_DIR}" ]]; then
     bashio::log.info "Copying data from ${LEGACY_DATA_DIR} to ${DATA_DIR} (old folder is kept)..."
     rm -rf "${DATA_DIR}.migrating"
     if cp -a "${LEGACY_DATA_DIR}" "${DATA_DIR}.migrating" && mv "${DATA_DIR}.migrating" "${DATA_DIR}"; then
-        bashio::log.info "Data copied. You can delete ${LEGACY_DATA_DIR} once SFP Vault works."
+        bashio::log.info "Data copied. You can delete ${LEGACY_DATA_DIR} once SFP vault works."
     else
         rm -rf "${DATA_DIR}.migrating"
         bashio::exit.nok "Could not copy ${LEGACY_DATA_DIR} to ${DATA_DIR}; nothing was changed."
@@ -58,7 +58,7 @@ else
     export INGRESS_PATH=""
 fi
 
-bashio::log.info "Starting SFP Vault Home Assistant Add-On..."
+bashio::log.info "Starting SFP vault Home Assistant Add-On..."
 bashio::log.info "Log Level: ${LOG_LEVEL}"
 bashio::log.info "Auto Discovery: ${AUTO_DISCOVER}"
 bashio::log.info "Device Patterns: ${DEVICE_NAME_PATTERNS}"

@@ -1,4 +1,4 @@
-# SFP Vault Makefile
+# SFP vault Makefile
 # Streamlined build and deployment commands
 
 .PHONY: help build dev prod test clean logs shell restart health status deploy
@@ -39,7 +39,7 @@ export VCS_REF
 ##@ General
 
 help: ## Display this help message
-	@echo "$(BOLD)SFP Vault - Build & Deployment Commands$(RESET)"
+	@echo "$(BOLD)SFP vault - Build & Deployment Commands$(RESET)"
 	@echo ""
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make $(BLUE)<target>$(RESET)\n\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  $(BLUE)%-15s$(RESET) %s\n", $$1, $$2 } /^##@/ { printf "\n$(BOLD)%s$(RESET)\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
