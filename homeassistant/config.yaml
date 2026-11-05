@@ -1,6 +1,6 @@
-name: "SFPLiberate"
-version: "0.2.2"
-slug: "sfpliberate"
+name: "SFP Vault"
+version: "0.3.0"
+slug: "sfpvault"
 description: "Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and manage SFP module EEPROM profiles"
 url: "https://github.com/0ofta/SFPLiberate"
 
@@ -18,7 +18,7 @@ ingress: true
 ingress_port: 3000
 ingress_entry: "/"
 panel_icon: mdi:ethernet
-panel_title: SFPLiberate
+panel_title: SFP Vault
 webui: "http://[HOST]:[PORT:3000]"
 
 # Bluetooth access required
@@ -74,4 +74,4 @@ schema:
 # scoped to this folder alone and can't reach the sibling backend/ and
 # frontend/ source trees this Dockerfile depends on. Built and pushed by
 # .github/workflows/ha-addon-build.yml on every push to main.
-image: "ghcr.io/0ofta/sfpliberate-addon-{arch}"
+image: "ghcr.io/0ofta/sfpvault-addon-{arch}"

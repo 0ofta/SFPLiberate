@@ -184,7 +184,7 @@ async function ensureCommunityCollection() {
 async function main() {
   const { databaseId, userBucketId, blobBucketId, photoBucketId } = defaults;
 
-  await ensureDatabase(databaseId, 'SFPLiberate Core');
+  await ensureDatabase(databaseId, 'SFP Vault Core');
   await ensurePersonalCollection();
   await ensureCommunityCollection();
 

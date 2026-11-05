@@ -52,8 +52,8 @@ You need to rename (or add new) GitHub repository secrets to use consolidated na
 |-------------|-------|-------|
 | `APPWRITE_API_KEY` | `standard_91089f96...` | ✅ No change |
 | `APPWRITE_PROJECT_ID` | `69078b02001266c5d333` | ✅ No change |
-| `APPWRITE_DATABASE_ID` | `sfpliberate` | ✅ No change |
-| `APPWRITE_SITE_ID` | `sfpliberate` | ✅ No change |
+| `APPWRITE_DATABASE_ID` | `sfpvault` | ✅ No change |
+| `APPWRITE_SITE_ID` | `sfpvault` | ✅ No change |
 
 ---
 
@@ -66,12 +66,12 @@ APPWRITE_PROJECT_ID=69078b02001266c5d333
 APPWRITE_API_KEY=standard_91089f96...
 
 # Database & Storage
-APPWRITE_DATABASE_ID=sfpliberate
+APPWRITE_DATABASE_ID=sfpvault
 APPWRITE_COLLECTION_ID=sfp_modules
 APPWRITE_BUCKET_ID=sfp_eeprom_data
 
 # Sites & Functions
-APPWRITE_SITE_ID=sfpliberate
+APPWRITE_SITE_ID=sfpvault
 APPWRITE_FUNCTION_ID=<function-id-from-console>
 
 # URLs
@@ -91,7 +91,7 @@ APPWRITE_SITE_ENABLE_COMMUNITY_FEATURES=true
 
 ### 1. Sites Configuration (app.sfplib.com)
 
-**Path**: Console → Sites → sfpliberate → Settings
+**Path**: Console → Sites → sfpvault → Settings
 
 | Setting | Value |
 |---------|-------|
@@ -136,7 +136,7 @@ NODE_ENV=production
 DEPLOYMENT_MODE=appwrite
 APPWRITE_ENDPOINT=https://nyc.cloud.appwrite.io/v1
 APPWRITE_PROJECT_ID=69078b02001266c5d333
-APPWRITE_DATABASE_ID=sfpliberate
+APPWRITE_DATABASE_ID=sfpvault
 APPWRITE_COLLECTION_ID=sfp_modules
 APPWRITE_BUCKET_ID=sfp_eeprom_data
 LOG_LEVEL=INFO
@@ -150,7 +150,7 @@ ESPHOME_PROXY_MODE=false
 
 ### 3. Database Configuration
 
-**Database**: `sfpliberate` (already created ✅)
+**Database**: `sfpvault` (already created ✅)
 
 **Collections**:
 - `sfp_modules` (already created ✅)

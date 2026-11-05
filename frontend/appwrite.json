@@ -1,11 +1,11 @@
 {
   "$schema": "https://appwrite.io/schemas/appwrite.json",
   "projectId": "69078b02001266c5d333",
-  "projectName": "sfpliberate",
+  "projectName": "sfpvault",
   "databases": [
     {
       "$id": "lib-core",
-      "name": "SFPLiberate Database",
+      "name": "SFP Vault Database",
       "enabled": true
     }
   ],

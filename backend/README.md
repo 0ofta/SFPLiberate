@@ -1,6 +1,6 @@
-# SFPLiberate Backend
+# SFP Vault Backend
 
-FastAPI backend for SFPLiberate that manages the SFP module library. Supports two deployment modes with automatic database adapter selection.
+FastAPI backend for SFP Vault that manages the SFP module library. Supports two deployment modes with automatic database adapter selection.
 
 ---
 
@@ -223,14 +223,14 @@ Or if duplicate:
 
 ```bash
 # Development build
-docker build -t sfpliberate-backend:dev -f Dockerfile.new .
+docker build -t sfpvault-backend:dev -f Dockerfile.new .
 
 # Production build with BuildKit cache
 docker build \
   --build-arg PYTHON_VERSION=3.11 \
   --build-arg POETRY_VERSION=1.8.5 \
-  --cache-from type=registry,ref=ghcr.io/0ofta/sfpliberate-backend:cache \
-  -t sfpliberate-backend:latest \
+  --cache-from type=registry,ref=ghcr.io/0ofta/sfpvault-backend:cache \
+  -t sfpvault-backend:latest \
   -f Dockerfile.new .
 ```
 

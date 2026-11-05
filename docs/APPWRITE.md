@@ -1,6 +1,6 @@
 # Appwrite Deployment Guide
 
-This guide covers automated deployment of SFPLiberate to Appwrite Cloud, a backend-as-a-service platform that provides hosting, authentication, and other features.
+This guide covers automated deployment of SFP Vault to Appwrite Cloud, a backend-as-a-service platform that provides hosting, authentication, and other features.
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@ This guide covers automated deployment of SFPLiberate to Appwrite Cloud, a backe
 
 ## Overview
 
-SFPLiberate uses a **feature flag-based deployment strategy** that allows:
+SFP Vault uses a **feature flag-based deployment strategy** that allows:
 
 - **Main branch**: Standalone Docker deployments only (no Appwrite references)
 - **Feature branches**: Appwrite deployments with authentication and cloud features
@@ -97,7 +97,7 @@ Before deploying to Appwrite, ensure you have:
 
 1. Log in to [Appwrite Cloud Console](https://cloud.appwrite.io)
 2. Click "Create Project"
-3. Enter project name: **SFPLiberate**
+3. Enter project name: **SFP Vault**
 4. Note your **Project ID** (needed for GitHub secrets)
 
 ### 2. Configure Authentication
@@ -248,7 +248,7 @@ Uses Appwrite CLI to deploy static files:
   working-directory: ./frontend
   run: |
     appwrite deploy function \
-      --function-id sfpliberate-frontend \
+      --function-id sfpvault-frontend \
       --yes
 ```
 
@@ -509,7 +509,7 @@ If deployment fails or issues are found:
 
 1. **GitHub Actions**: Cancel running workflow
 2. **Appwrite Console**:
-   - Go to project → Functions → `sfpliberate-frontend`
+   - Go to project → Functions → `sfpvault-frontend`
    - Click **Deployments**
    - Revert to previous deployment
 3. **Fix and Redeploy**:
@@ -572,4 +572,4 @@ For issues or questions:
 ---
 
 **Last Updated**: December 2024  
-**Maintained By**: SFPLiberate Team
+**Maintained By**: SFP Vault Team

@@ -104,15 +104,15 @@ EXPOSE 3000
 ENV ADDON_VERSION="${BUILD_VERSION}"
 
 LABEL \
-    io.hass.name="SFPLiberate" \
+    io.hass.name="SFP Vault" \
     io.hass.description="Bluetooth companion for Ubiquiti SFP Wizard" \
     io.hass.arch="aarch64|amd64|armhf|armv7" \
     io.hass.type="addon" \
     io.hass.version="${BUILD_VERSION}" \
     maintainer="0ofta <https://github.com/0ofta>" \
-    org.opencontainers.image.title="SFPLiberate" \
+    org.opencontainers.image.title="SFP Vault" \
     org.opencontainers.image.description="Bluetooth companion for Ubiquiti SFP Wizard" \
-    org.opencontainers.image.vendor="SFPLiberate" \
+    org.opencontainers.image.vendor="SFP Vault" \
     org.opencontainers.image.authors="Josiah Nelson, 0ofta" \
     org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.url="https://github.com/0ofta/SFPLiberate" \

@@ -1,6 +1,6 @@
 {
-  "name": "SFP Sage",
-  "short_name": "SFP Sage",
+  "name": "SFP Vault",
+  "short_name": "SFP Vault",
   "description": "Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and manage SFP module EEPROM profiles",
   "icons": [
     {

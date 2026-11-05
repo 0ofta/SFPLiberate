@@ -2,7 +2,7 @@
 
 ## Overview
 
-SFPLiberate now supports **ESPHome Bluetooth Proxy** as an alternative connection method for environments where direct Web Bluetooth is unavailable (Safari, iOS, remote deployments).
+SFP Vault now supports **ESPHome Bluetooth Proxy** as an alternative connection method for environments where direct Web Bluetooth is unavailable (Safari, iOS, remote deployments).
 
 This integration allows users to leverage their existing ESPHome Bluetooth proxy devices to:
 - Discover SFP Wizard devices on the network
@@ -272,7 +272,7 @@ saveActiveProfile({
 curl http://192.168.1.100:6053
 
 # Test from backend container
-docker exec sfpliberate-backend python -c "
+docker exec sfpvault-backend python -c "
 from aioesphomeapi import APIClient
 import asyncio
 

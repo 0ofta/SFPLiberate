@@ -109,7 +109,7 @@ APPWRITE_PROJECT_ID=69078b02001266c5d333
 
 ```bash
 # Navigate to project root
-cd /home/user/SFPLiberate
+cd /home/user/sfpvault
 
 # Install Appwrite CLI if needed
 npm install -g appwrite-cli

@@ -1,6 +1,6 @@
 # Release Process
 
-This document describes how to create releases for the SFPLiberate Home Assistant add-on.
+This document describes how to create releases for the SFP Vault Home Assistant add-on.
 
 ## Overview
 
@@ -121,10 +121,10 @@ Before creating a release, ensure:
   - `armv7` (ARMv7 devices)
 - Pushes images to GHCR:
   ```
-  ghcr.io/0ofta/sfpliberate-addon-aarch64:0.2.0
-  ghcr.io/0ofta/sfpliberate-addon-amd64:0.2.0
-  ghcr.io/0ofta/sfpliberate-addon-armhf:0.2.0
-  ghcr.io/0ofta/sfpliberate-addon-armv7:0.2.0
+  ghcr.io/0ofta/sfpvault-addon-aarch64:0.2.0
+  ghcr.io/0ofta/sfpvault-addon-amd64:0.2.0
+  ghcr.io/0ofta/sfpvault-addon-armhf:0.2.0
+  ghcr.io/0ofta/sfpvault-addon-armv7:0.2.0
   ```
 
 ### 5. Availability

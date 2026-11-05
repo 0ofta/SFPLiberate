@@ -1,5 +1,5 @@
 #!/bin/bash
-# Production Deployment Script for SFPLiberate
+# Production Deployment Script for SFP Vault
 # Usage: ./scripts/deploy.sh [options]
 #
 # Options:
@@ -19,7 +19,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_NAME="sfpliberate"
+PROJECT_NAME="sfpvault"
 COMPOSE_FILE="docker-compose.yml"
 BACKUP_DIR="./backups"
 HEALTH_CHECK_TIMEOUT=60
@@ -242,15 +242,15 @@ tag_current_as_previous() {
   log_info "Tagging current images as 'previous' for rollback..."
   
   # Check if current images exist
-  if docker image inspect sfpliberate-backend:latest &>/dev/null; then
-    docker tag sfpliberate-backend:latest sfpliberate-backend:previous
+  if docker image inspect sfpvault-backend:latest &>/dev/null; then
+    docker tag sfpvault-backend:latest sfpvault-backend:previous
     log_success "Tagged backend:latest as backend:previous"
   else
     log_warning "No existing backend:latest image found"
   fi
   
-  if docker image inspect sfpliberate-frontend:latest &>/dev/null; then
-    docker tag sfpliberate-frontend:latest sfpliberate-frontend:previous
+  if docker image inspect sfpvault-frontend:latest &>/dev/null; then
+    docker tag sfpvault-frontend:latest sfpvault-frontend:previous
     log_success "Tagged frontend:latest as frontend:previous"
   else
     log_warning "No existing frontend:latest image found"
@@ -262,8 +262,8 @@ rollback() {
   log_warning "Rolling back to previous version..."
   
   # Check for explicitly tagged previous images
-  PREVIOUS_BACKEND="sfpliberate-backend:previous"
-  PREVIOUS_FRONTEND="sfpliberate-frontend:previous"
+  PREVIOUS_BACKEND="sfpvault-backend:previous"
+  PREVIOUS_FRONTEND="sfpvault-frontend:previous"
   
   if ! docker image inspect "$PREVIOUS_BACKEND" &>/dev/null || ! docker image inspect "$PREVIOUS_FRONTEND" &>/dev/null; then
     log_error "No previous images found for rollback"
@@ -280,8 +280,8 @@ rollback() {
   docker-compose down
   
   # Tag previous images as latest
-  docker tag "$PREVIOUS_BACKEND" sfpliberate-backend:latest
-  docker tag "$PREVIOUS_FRONTEND" sfpliberate-frontend:latest
+  docker tag "$PREVIOUS_BACKEND" sfpvault-backend:latest
+  docker tag "$PREVIOUS_FRONTEND" sfpvault-frontend:latest
   
   # Start with previous images
   docker-compose up -d
@@ -306,7 +306,7 @@ cleanup() {
 main() {
   echo ""
   echo "╔════════════════════════════════════════════════╗"
-  echo "║   SFPLiberate Production Deployment Script    ║"
+  echo "║   SFP Vault Production Deployment Script    ║"
   echo "╚════════════════════════════════════════════════╝"
   echo ""
   

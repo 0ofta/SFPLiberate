@@ -1,4 +1,4 @@
-# SFPLiberate Makefile
+# SFP Vault Makefile
 # Streamlined build and deployment commands
 
 .PHONY: help build dev prod test clean logs shell restart health status deploy
@@ -14,7 +14,7 @@ YELLOW := \033[33m
 BLUE := \033[34m
 
 # Project metadata
-PROJECT_NAME := sfpliberate
+PROJECT_NAME := sfpvault
 COMPOSE_FILE := docker-compose.yml
 COMPOSE_DEV := docker-compose.dev.yml
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -39,7 +39,7 @@ export VCS_REF
 ##@ General
 
 help: ## Display this help message
-	@echo "$(BOLD)SFPLiberate - Build & Deployment Commands$(RESET)"
+	@echo "$(BOLD)SFP Vault - Build & Deployment Commands$(RESET)"
 	@echo ""
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make $(BLUE)<target>$(RESET)\n\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  $(BLUE)%-15s$(RESET) %s\n", $$1, $$2 } /^##@/ { printf "\n$(BOLD)%s$(RESET)\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 

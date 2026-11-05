@@ -44,7 +44,7 @@ export function LoginForm() {
             <CardHeader>
                 <CardTitle>Sign In</CardTitle>
                 <CardDescription>
-                    Enter your credentials to access SFP Sage
+                    Enter your credentials to access SFP Vault
                 </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>

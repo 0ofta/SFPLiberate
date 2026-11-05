@@ -119,7 +119,7 @@ jobs:
             --arch ${{ matrix.arch }} \
             --use-config-version \
             --registry ghcr.io/${{ github.repository_owner }} \
-            --image sfpliberate-addon-{arch} \
+            --image sfpvault-addon-{arch} \
             --push
 
       - name: Build and push add-on (develop)
@@ -131,7 +131,7 @@ jobs:
             --arch ${{ matrix.arch }} \
             --tag "${VERSION}-dev" \
             --registry ghcr.io/${{ github.repository_owner }} \
-            --image sfpliberate-addon-{arch} \
+            --image sfpvault-addon-{arch} \
             --push
 
       - name: Build and push add-on (release)
@@ -141,7 +141,7 @@ jobs:
             --arch ${{ matrix.arch }} \
             --use-config-version \
             --registry ghcr.io/${{ github.repository_owner }} \
-            --image sfpliberate-addon-{arch} \
+            --image sfpvault-addon-{arch} \
             --push
 
   # Update repository.json after successful build
@@ -158,7 +158,7 @@ jobs:
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           echo "{
-            \"name\": \"SFPLiberate Add-on Repository\",
+            \"name\": \"SFP Vault Add-on Repository\",
             \"url\": \"https://github.com/${{ github.repository }}\",
             \"maintainer\": \"${{ github.repository_owner }}\",
             \"last_updated\": \"$TIMESTAMP\"

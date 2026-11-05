@@ -1,6 +1,6 @@
-# Contributing to SFPLiberate
+# Contributing to SFP Vault
 
-Thanks for your interest in contributing to SFPLiberate! We welcome contributions from the community, whether it's bug fixes, new features, documentation improvements, or BLE protocol discoveries.
+Thanks for your interest in contributing to SFP Vault! We welcome contributions from the community, whether it's bug fixes, new features, documentation improvements, or BLE protocol discoveries.
 
 **Priority Areas:**
 - Reverse-engineering and implementing the SFP write path via BLE
@@ -32,7 +32,7 @@ Thanks for your interest in contributing to SFPLiberate! We welcome contribution
 ```bash
 # Clone the repository
 git clone https://github.com/0ofta/SFPLiberate.git
-cd SFPLiberate
+cd SFP Vault
 
 # Start the full stack
 docker-compose up --build
@@ -86,7 +86,7 @@ Discovery & Web Bluetooth
 ### Database Access
 ```bash
 # Connect to SQLite database
-docker exec -it sfpliberate-backend sqlite3 /app/data/sfp_library.db
+docker exec -it sfpvault-backend sqlite3 /app/data/sfp_library.db
 
 # View schema
 .schema
@@ -153,7 +153,7 @@ When working on the Appwrite deployment target (cloud site):
 - Use the Appwrite CLI from `frontend/` to push site code:
   ```bash
   cd frontend
-  appwrite sites create-deployment --site-id sfpliberate --code . --activate true
+  appwrite sites create-deployment --site-id sfpvault --code . --activate true
   ```
 - The frontend uses the native Appwrite Web SDK directly (no Appwrite Functions). Server actions use `node-appwrite` and accept either the Appwrite session cookie or a short‑lived JWT cookie set via `/api/auth/set-jwt` after login.
 - The modules page uses Appwrite Realtime; there is no manual "Refresh" in Appwrite mode.
@@ -490,7 +490,7 @@ When the community repo is live:
 1. Read modules using this app
 2. Submit via "Upload to Community" button (no GitHub account needed initially)
 3. Maintainers review submissions in `/app/data/submissions` inbox
-4. Approved modules are added to `SFPLiberate/modules` repo via PR
+4. Approved modules are added to `sfpvault/modules` repo via PR
 5. CI validates schema, checksums, and blob integrity
 
 ## Legal & Disclaimer
@@ -513,4 +513,4 @@ By contributing, you agree that your contributions will be licensed under the sa
 - Review existing issues and PRs for context
 - Open a discussion or issue if stuck
 
-**Thank you for contributing to SFPLiberate!** 🚀
+**Thank you for contributing to SFP Vault!** 🚀

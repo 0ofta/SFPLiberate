@@ -23,7 +23,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-    title: 'SFP Sage',
+    title: 'SFP Vault',
     description: 'Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and manage SFP module EEPROM profiles',
     icons: {
         icon: '/favicon.ico',

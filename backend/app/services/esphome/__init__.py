@@ -1,4 +1,4 @@
-"""ESPHome Bluetooth Proxy integration for SFPLiberate."""
+"""ESPHome Bluetooth Proxy integration for SFP Vault."""
 
 from .connection_manager import ConnectionManager
 from .proxy_service import ESPHomeProxyService

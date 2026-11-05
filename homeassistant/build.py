@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Custom Docker build script for SFPLiberate Home Assistant Add-on.
+Custom Docker build script for SFP Vault Home Assistant Add-on.
 
 Inspired by ESPHome's build system, this provides better control over
 multi-architecture builds, caching, and tagging.
@@ -162,7 +162,7 @@ def get_addon_version() -> str:
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Build SFPLiberate Home Assistant Add-on Docker images"
+        description="Build SFP Vault Home Assistant Add-on Docker images"
     )
     parser.add_argument(
         "--arch",
@@ -181,8 +181,8 @@ def main():
     )
     parser.add_argument(
         "--image",
-        default="sfpliberate-addon-{arch}",
-        help="Image name with {arch} placeholder (default: sfpliberate-addon-{arch})",
+        default="sfpvault-addon-{arch}",
+        help="Image name with {arch} placeholder (default: sfpvault-addon-{arch})",
     )
     parser.add_argument(
         "--push",
@@ -233,7 +233,7 @@ def main():
         list(BuildConfig.ARCHITECTURES.keys()) if args.arch == "all" else [args.arch]
     )
 
-    logger.info(f"Building SFPLiberate Add-on")
+    logger.info(f"Building SFP Vault Add-on")
     logger.info(f"  Tag: {tag}")
     logger.info(f"  Architectures: {', '.join(architectures)}")
     logger.info(f"  Registry: {args.registry}")

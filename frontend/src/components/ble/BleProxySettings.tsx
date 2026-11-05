@@ -156,7 +156,7 @@ export function BleProxySettings() {
                     <AlertTitle>About BLE Proxy</AlertTitle>
                     <AlertDescription>
                         The standalone BLE proxy enables iOS/Safari users to connect to SFP Wizard devices.
-                        Run the proxy locally with: <code className="text-xs bg-muted px-1 py-0.5 rounded">docker run --network host ghcr.io/sfpliberate/ble-proxy:latest</code>
+                        Run the proxy locally with: <code className="text-xs bg-muted px-1 py-0.5 rounded">docker run --network host ghcr.io/sfpvault/ble-proxy:latest</code>
                     </AlertDescription>
                 </Alert>
 

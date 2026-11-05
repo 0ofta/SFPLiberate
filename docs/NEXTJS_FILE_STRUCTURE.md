@@ -250,7 +250,7 @@ NODE_ENV=production
 
 # .env.example (Appwrite Mode)
 DEPLOYMENT_MODE=appwrite
-NEXT_PUBLIC_API_URL=https://api.sfpliberate.com
+NEXT_PUBLIC_API_URL=https://api.sfpvault.com
 NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
 NEXT_PUBLIC_APPWRITE_PROJECT_ID=your-project-id
 NODE_ENV=production

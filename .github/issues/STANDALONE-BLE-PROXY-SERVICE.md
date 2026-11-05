@@ -31,7 +31,7 @@ Create a **standalone BLE proxy microservice** Docker container that runs on a u
 ┌──────────────────────────────────────────────┐
 │      iOS Safari (User's Device)              │
 │                                               │
-│  Appwrite UI (sfpliberate.cloud)             │
+│  Appwrite UI (sfpvault.cloud)             │
 │  └─ Settings: ws://192.168.1.100:8081/ble/ws│
 └────────────────┬─────────────────────────────┘
                  │ WebSocket (local network)
@@ -47,7 +47,7 @@ Create a **standalone BLE proxy microservice** Docker container that runs on a u
 │      └─ BLE ──► SFP Wizard Device            │
 └──────────────────────────────────────────────┘
 
-Cloud API Backend (sfpliberate-api.cloud)
+Cloud API Backend (sfpvault-api.cloud)
   ├─ Module library storage
   ├─ Community submissions
   └─ No BLE proxy (delegates to user's local)
@@ -130,7 +130,7 @@ Cloud API Backend (sfpliberate-api.cloud)
 
 ## 📦 Deliverables
 
-1. **Docker Image:** `ghcr.io/0ofta/sfpliberate-ble-proxy:latest`
+1. **Docker Image:** `ghcr.io/0ofta/sfpvault-ble-proxy:latest`
 2. **GitHub Repo:** New directory `ble-proxy-service/` in main repo
 3. **Frontend Settings Page:** Custom endpoint configuration UI
 4. **User Documentation:** README with setup guide

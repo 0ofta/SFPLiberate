@@ -1,8 +1,8 @@
-# **SFPLiberate Home Assistant Add-On - Implementation Plan**
+# **SFP Vault Home Assistant Add-On - Implementation Plan**
 
 ## **Executive Summary**
 
-This plan outlines the implementation of SFPLiberate as a Home Assistant Add-On, providing a simplified deployment method that leverages HA's native Bluetooth infrastructure. The add-on will maintain the core functionality of the standalone Docker deployment while greatly simplifying setup, Bluetooth discovery, and ESPHome integration.
+This plan outlines the implementation of SFP Vault as a Home Assistant Add-On, providing a simplified deployment method that leverages HA's native Bluetooth infrastructure. The add-on will maintain the core functionality of the standalone Docker deployment while greatly simplifying setup, Bluetooth discovery, and ESPHome integration.
 
 ---
 
@@ -10,7 +10,7 @@ This plan outlines the implementation of SFPLiberate as a Home Assistant Add-On,
 
 ### **1.1 New Directory Structure**
 
-Create a new `/sfpliberate` directory at the root of the repository:
+Create a new `/sfpvault` directory at the root of the repository:
 
 ```
 /homeassistant/
@@ -35,9 +35,9 @@ Create a new `/sfpliberate` directory at the root of the repository:
 
 #### **config.yaml** (Add-on Configuration)
 ```yaml
-name: "SFPLiberate"
+name: "SFP Vault"
 version: "1.0.0"
-slug: "sfpliberate"
+slug: "sfpvault"
 description: "Bluetooth companion for Ubiquiti SFP Wizard - capture, clone, and manage SFP module EEPROM profiles"
 url: "https://github.com/josiah-nelson/SFPLiberate"
 arch:
@@ -52,7 +52,7 @@ boot: auto
 ingress: true
 ingress_port: 3000
 panel_icon: mdi:ethernet
-panel_title: SFPLiberate
+panel_title: SFP Vault
 
 # Bluetooth access required
 host_dbus: true
@@ -105,7 +105,7 @@ export HA_WS_URL="ws://supervisor/core/websocket"
 # Add-on specific paths
 export DATABASE_FILE="/config/homeassistant/sfp_library.db"
 export SUBMISSIONS_DIR="/config/homeassistant/submissions"
-export DATA_DIR="/config/sfpliberate"
+export DATA_DIR="/config/sfpvault"
 
 # Create directories
 mkdir -p /config/homeassistant/submissions
@@ -116,7 +116,7 @@ export ESPHOME_PROXY_MODE="false"  # We use HA Bluetooth API instead
 export HA_ADDON_MODE="true"
 
 # Start services via s6-overlay
-bashio::log.info "Starting SFPLiberate Home Assistant Add-On..."
+bashio::log.info "Starting SFP Vault Home Assistant Add-On..."
 ```
 
 ---
@@ -140,7 +140,7 @@ bashio::log.info "Starting SFPLiberate Home Assistant Add-On..."
 Create `/backend/app/services/ha_bluetooth/ha_bluetooth_client.py`:
 
 ```python
-"""Home Assistant Bluetooth API client for SFPLiberate add-on."""
+"""Home Assistant Bluetooth API client for SFP Vault add-on."""
 
 import asyncio
 import logging
@@ -513,7 +513,7 @@ ingress_port: 3000
 
 This exposes the frontend at:
 - **Internal:** `http://homeassistant.local:8123/api/hassio_ingress/<token>/`
-- **User-facing:** Settings → Add-ons → SFPLiberate → OPEN WEB UI
+- **User-facing:** Settings → Add-ons → SFP Vault → OPEN WEB UI
 
 ### **5.2 Frontend Routing Adjustments**
 
@@ -551,7 +551,7 @@ Create a **repository.json** file (for HA add-on repository):
 
 ```json
 {
-  "name": "SFPLiberate Add-on Repository",
+  "name": "SFP Vault Add-on Repository",
   "url": "https://github.com/josiah-nelson/SFPLiberate",
   "maintainer": "Josiah Nelson <josiah@example.com>"
 }
@@ -573,7 +573,7 @@ docker-compose up --build
 [![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fjosiah-nelson%2FSFPLiberate)
 
 1. Click the button above (or add repository manually: `https://github.com/josiah-nelson/SFPLiberate`)
-2. Install the "SFPLiberate" add-on
+2. Install the "SFP Vault" add-on
 3. Start the add-on
 4. Click "OPEN WEB UI"
 ```
@@ -632,7 +632,7 @@ Users can configure the add-on via HA UI:
 ### **7.2 UI Configuration Panel**
 
 Users can access this via:
-1. Settings → Add-ons → SFPLiberate → Configuration tab
+1. Settings → Add-ons → SFP Vault → Configuration tab
 2. Edit YAML or use the form-based UI
 
 ---
@@ -746,7 +746,7 @@ async def test_device_discovery(mock_ha_api):
 
 Use a test Home Assistant instance:
 1. Install HA in dev mode (devcontainer)
-2. Add SFPLiberate repository
+2. Add SFP Vault repository
 3. Install add-on
 4. Test BLE device discovery with real SFP Wizard
 
@@ -758,7 +758,7 @@ Use a test Home Assistant instance:
 
 Create `/docs/HOME_ASSISTANT.md`:
 ```markdown
-# SFPLiberate Home Assistant Add-On
+# SFP Vault Home Assistant Add-On
 
 ## Installation
 
@@ -855,7 +855,7 @@ Add section under "Deployment Modes":
 **Development:**
 ```bash
 # Build add-on locally
-docker build -f homeassistant/Dockerfile -t sfpliberate-addon .
+docker build -f homeassistant/Dockerfile -t sfpvault-addon .
 
 # Test in dev mode
 docker-compose -f docker-compose.ha-dev.yml up
@@ -963,10 +963,10 @@ In a future version, expose read-only entities:
 
 ```python
 # Sensor: Number of stored modules
-sensor.sfpliberate_module_count
+sensor.sfpvault_module_count
 
 # Binary sensor: SFP Wizard connection status
-binary_sensor.sfpliberate_connected
+binary_sensor.sfpvault_connected
 
 # Device tracker: Last used SFP Wizard
 device_tracker.sfp_wizard_last_seen
@@ -986,7 +986,7 @@ automation:
         entity_id: input_boolean.clone_module
         to: 'on'
     action:
-      - service: sfpliberate.write_module
+      - service: sfpvault.write_module
         data:
           module_id: 42
 ```
@@ -1046,7 +1046,7 @@ The HA add-on will be considered successful when:
 
 ## **17. Conclusion**
 
-This implementation plan provides a complete roadmap for porting SFPLiberate to a Home Assistant Add-On. The architecture leverages HA's native Bluetooth infrastructure to eliminate complex setup (mDNS, manual proxy configuration) while maintaining full functionality.
+This implementation plan provides a complete roadmap for porting SFP Vault to a Home Assistant Add-On. The architecture leverages HA's native Bluetooth infrastructure to eliminate complex setup (mDNS, manual proxy configuration) while maintaining full functionality.
 
 **Key Advantages:**
 - **Simplified deployment** - One-click install for HA users

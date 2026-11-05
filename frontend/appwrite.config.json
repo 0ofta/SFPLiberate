@@ -2,7 +2,7 @@
   "$schema": "https://appwrite.io/schemas/appwrite.json",
   "projectId": "${APPWRITE_PROJECT_ID}",
   "endpoint": "${APPWRITE_ENDPOINT}",
-  "projectName": "SFPLiberate",
+  "projectName": "SFP Vault",
   "settings": {
     "services": {
       "account": true,
@@ -21,8 +21,8 @@
   },
   "sites": [
     {
-      "$id": "sfpliberate",
-      "name": "SFPLiberate",
+      "$id": "sfpvault",
+      "name": "SFP Vault",
       "enabled": true,
       "logging": true,
       "framework": "nextjs",
@@ -34,7 +34,7 @@
       "buildRuntime": "node-22",
       "adapter": "ssr",
       "fallbackFile": "",
-      "path": "sites/SFPLiberate"
+      "path": "sites/sfpvault"
     }
   ]
 }

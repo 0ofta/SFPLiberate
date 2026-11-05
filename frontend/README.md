@@ -1,10 +1,10 @@
-# SFPLiberate - Next.js Frontend
+# SFP Vault - Next.js Frontend
 
-Modern Next.js 16 frontend for SFPLiberate SFP Wizard companion tool, built with shadcn/ui and TypeScript.
+Modern Next.js 16 frontend for SFP Vault SFP Wizard companion tool, built with shadcn/ui and TypeScript.
 
 ## 🎯 Overview
 
-This is a complete rewrite of the SFPLiberate frontend using modern technologies:
+This is a complete rewrite of the SFP Vault frontend using modern technologies:
 
 - **Next.js 16** (App Router) with React 19
 - **TypeScript 5** (strict mode)

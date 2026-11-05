@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**SFPLiberate** is a Web Bluetooth companion app for the Ubiquiti SFP Wizard (UACC-SFP-Wizard) that captures SFP/SFP+ module EEPROM data over BLE, stores it in a local library, and enables cloning/reprogramming modules.
+**SFP Vault** is a Web Bluetooth companion app for the Ubiquiti SFP Wizard (UACC-SFP-Wizard) that captures SFP/SFP+ module EEPROM data over BLE, stores it in a local library, and enables cloning/reprogramming modules.
 
 **Architecture:**
 - **Frontend:** Next.js 16 (App Router) + TypeScript + React 19 + shadcn/ui
@@ -179,7 +179,7 @@ docker-compose logs -f backend     # View backend logs
 **Stack:**
 - Frontend: Next.js standalone (ingress at port 3000)
 - Backend: FastAPI + SQLite (port 80)
-- Database: SQLite in `/config/sfpliberate/`
+- Database: SQLite in `/config/sfpvault/`
 - Bluetooth: HA Bluetooth API (not mDNS)
 
 **Architecture Differences:**
@@ -198,11 +198,11 @@ docker-compose logs -f backend     # View backend logs
 **Environment:**
 - `HA_ADDON_MODE=true` (set in run.sh)
 - `DEPLOYMENT_MODE=homeassistant`
-- `DATABASE_FILE=/config/sfpliberate/sfp_library.db`
+- `DATABASE_FILE=/config/sfpvault/sfp_library.db`
 - `SUPERVISOR_TOKEN` (provided by HA)
 
 **Configuration:**
-Users configure via HA UI (Settings → Add-ons → SFPLiberate → Configuration):
+Users configure via HA UI (Settings → Add-ons → SFP Vault → Configuration):
 - `log_level`: Logging verbosity
 - `auto_discover`: Enable/disable auto-discovery
 - `device_name_patterns`: List of patterns to match (e.g., ["SFP", "Wizard"])
@@ -212,7 +212,7 @@ Users configure via HA UI (Settings → Add-ons → SFPLiberate → Configuratio
 **Development:**
 ```bash
 # Build add-on locally
-docker build -f homeassistant/Dockerfile -t sfpliberate-addon .
+docker build -f homeassistant/Dockerfile -t sfpvault-addon .
 
 # Test in dev mode (requires running HA instance)
 docker-compose -f docker-compose.ha-dev.yml up
@@ -243,7 +243,7 @@ POST /api/v1/ha-bluetooth/connect   # Connect & get UUIDs
 **Ingress Integration:**
 - Add-on exposes frontend at port 3000
 - HA's ingress proxy handles authentication & routing
-- Users access via Settings → Add-ons → SFPLiberate → OPEN WEB UI
+- Users access via Settings → Add-ons → SFP Vault → OPEN WEB UI
 - No port configuration needed
 
 ---
@@ -466,7 +466,7 @@ npm run start                           # Serve production build
 
 ```bash
 # Access SQLite database
-docker exec -it sfpliberate-backend sqlite3 /app/data/sfp_library.db
+docker exec -it sfpvault-backend sqlite3 /app/data/sfp_library.db
 
 # Common queries
 SELECT id, name, vendor, model FROM sfp_modules;

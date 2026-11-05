@@ -62,7 +62,7 @@ Backend
 
 Sidecar Site + Community Modules Repo
 - Stand up public community site on Appwrite Cloud (invite‑only passphrases). Keep initial scope simple: uploads and browsing.
-- Create `SFPLiberate/modules` repo or Appwrite collections with:
+- Create `sfpvault/modules` repo or Appwrite collections with:
   - `index.json` (versioned schema), `blobs/<sha256>.bin`, CI validation for schema and blob size/hash.
   - Contribution docs describing how maintainers ingest inbox submissions from this app.
 - Publish a stable `COMMUNITY_INDEX_URL` and update the frontend constant.

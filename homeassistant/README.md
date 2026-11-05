@@ -1,4 +1,4 @@
-# SFPLiberate Home Assistant Add-On
+# SFP Vault Home Assistant Add-On
 
 [![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2F0ofta%2FSFPLiberate)
 
@@ -6,7 +6,7 @@ Bluetooth companion for the Ubiquiti SFP Wizard (UACC-SFP-Wizard). Capture, clon
 
 ## About
 
-The Ubiquiti SFP Wizard can only store ONE module profile at a time. SFPLiberate solves this by providing unlimited storage for your SFP module profiles, with automatic Bluetooth discovery and a simple click-to-connect interface.
+The Ubiquiti SFP Wizard can only store ONE module profile at a time. SFP Vault solves this by providing unlimited storage for your SFP module profiles, with automatic Bluetooth discovery and a simple click-to-connect interface.
 
 ## Features
 
@@ -21,7 +21,7 @@ The Ubiquiti SFP Wizard can only store ONE module profile at a time. SFPLiberate
 ## Installation
 
 1. Click the "Add to Home Assistant" button above
-2. Install the "SFPLiberate" add-on
+2. Install the "SFP Vault" add-on
 3. Start the add-on
 4. Click "OPEN WEB UI"
 
@@ -91,20 +91,20 @@ The add-on can also use your Home Assistant host's built-in Bluetooth adapter:
 
 1. Move SFP Wizard closer to Bluetooth adapter/proxy
 2. Increase `connection_timeout` setting
-3. Check add-on logs: Settings → Add-ons → SFPLiberate → Logs
+3. Check add-on logs: Settings → Add-ons → SFP Vault → Logs
 4. Restart the add-on
 
 ### Logs show errors
 
 Check the add-on logs for detailed error messages:
-- Settings → Add-ons → SFPLiberate → Logs
+- Settings → Add-ons → SFP Vault → Logs
 - Set `log_level: debug` for more verbose output
 
 ## Data & Backups
 
 ### Data Storage
 
-All data is stored in `/config/sfpliberate/`:
+All data is stored in `/config/sfpvault/`:
 - `sfp_library.db` - SQLite database with module profiles
 - `submissions/` - User-submitted module profiles
 
@@ -114,7 +114,7 @@ Your SFP module library is automatically included in Home Assistant backups. To 
 
 1. Settings → System → Backups
 2. Create Backup
-3. Your SFPLiberate data is included
+3. Your SFP Vault data is included
 
 ## Migration from Standalone Docker
 

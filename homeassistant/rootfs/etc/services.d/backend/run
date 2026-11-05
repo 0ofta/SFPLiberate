@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 set -e
 
-bashio::log.info "Starting SFPLiberate FastAPI backend..."
+bashio::log.info "Starting SFP Vault FastAPI backend..."
 
 # Validate backend directory exists
 if [[ ! -d /app/backend ]]; then
@@ -21,9 +21,9 @@ fi
 
 # Create and validate database directory
 bashio::log.info "Setting up database directory..."
-mkdir -p /config/sfpliberate/backups
-if [[ ! -w /config/sfpliberate ]]; then
-  bashio::log.error "Cannot write to /config/sfpliberate!"
+mkdir -p /config/sfpvault/backups
+if [[ ! -w /config/sfpvault ]]; then
+  bashio::log.error "Cannot write to /config/sfpvault!"
   bashio::log.error "Check Home Assistant permissions for the add-on."
   exit 1
 fi
@@ -51,8 +51,8 @@ DEVICE_PATTERNS=$(bashio::addon.config | jq -c '.device_name_patterns // ["SFP",
 export LOG_LEVEL
 export HA_ADDON_MODE=true
 export DEPLOYMENT_MODE=homeassistant
-export DATABASE_FILE=/config/sfpliberate/sfp_library.db
-export DATABASE_URL="sqlite+aiosqlite:////config/sfpliberate/sfp_library.db"
+export DATABASE_FILE=/config/sfpvault/sfp_library.db
+export DATABASE_URL="sqlite+aiosqlite:////config/sfpvault/sfp_library.db"
 export AUTO_DISCOVER
 export DEVICE_NAME_PATTERNS="${DEVICE_PATTERNS}"
 export CONNECTION_TIMEOUT
@@ -64,7 +64,7 @@ export ENABLE_METRICS
 export DATABASE_BACKUP_ENABLED
 export DATABASE_BACKUP_INTERVAL
 export DATABASE_BACKUP_MAX_COUNT
-export DATABASE_BACKUP_PATH=/config/sfpliberate/backups
+export DATABASE_BACKUP_PATH=/config/sfpvault/backups
 export ENABLE_DEBUG_BLE
 
 # Log configuration

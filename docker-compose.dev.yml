@@ -2,7 +2,7 @@
 # Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 # Or use: make dev
 
-name: sfpliberate-dev
+name: sfpvault-dev
 
 services:
   backend:
@@ -12,7 +12,7 @@ services:
       dockerfile: Dockerfile.new
 
     # Override image tag for dev
-    image: sfpliberate-backend:dev
+    image: sfpvault-backend:dev
 
     # Mount source code for hot-reload
     volumes:
@@ -71,7 +71,7 @@ services:
       dockerfile: Dockerfile
 
     # Override image tag for dev
-    image: sfpliberate-frontend:dev
+    image: sfpvault-frontend:dev
 
     # Mount source code for hot-reload
     volumes:

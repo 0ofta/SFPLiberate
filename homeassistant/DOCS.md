@@ -1,18 +1,18 @@
-# SFPLiberate Home Assistant Add-On Documentation
+# SFP Vault Home Assistant Add-On Documentation
 
 ## Overview
 
-SFPLiberate is a Home Assistant add-on that provides a web-based interface for managing SFP module EEPROM profiles using the Ubiquiti SFP Wizard (UACC-SFP-Wizard).
+SFP Vault is a Home Assistant add-on that provides a web-based interface for managing SFP module EEPROM profiles using the Ubiquiti SFP Wizard (UACC-SFP-Wizard).
 
 ## Installation
 
-1. Add the SFPLiberate repository to Home Assistant:
+1. Add the SFP Vault repository to Home Assistant:
    - Click the "Add to Home Assistant" button in the README
    - OR manually add: `https://github.com/0ofta/SFPLiberate`
 
 2. Install the add-on:
    - Settings → Add-ons → Add-on Store
-   - Find "SFPLiberate"
+   - Find "SFP Vault"
    - Click Install
 
 3. Start the add-on:
@@ -114,10 +114,10 @@ bluetooth_proxy:
 
 ### Data Storage
 
-All data is stored in `/config/sfpliberate/`:
+All data is stored in `/config/sfpvault/`:
 
 ```
-/config/sfpliberate/
+/config/sfpvault/
 ├── sfp_library.db          # SQLite database
 └── submissions/            # User submissions
 ```
@@ -184,7 +184,7 @@ This location ensures:
 **Symptom:** "Unable to connect" or blank page
 
 **Solutions:**
-1. Check add-on is running: Settings → Add-ons → SFPLiberate
+1. Check add-on is running: Settings → Add-ons → SFP Vault
 2. Review add-on logs for errors
 3. Restart the add-on
 4. Restart Home Assistant if add-on won't start
@@ -194,7 +194,7 @@ This location ensures:
 **Symptom:** Errors mentioning database or SQLite
 
 **Solutions:**
-1. Check `/config/sfpliberate/` has write permissions
+1. Check `/config/sfpvault/` has write permissions
 2. Ensure sufficient disk space
 3. Stop add-on, backup database, restart add-on
 4. If corrupted, delete database (will lose data!)
@@ -229,7 +229,7 @@ To troubleshoot issues:
 log_level: debug
 ```
 
-Then check logs: Settings → Add-ons → SFPLiberate → Logs
+Then check logs: Settings → Add-ons → SFP Vault → Logs
 
 ## Backups & Restore
 
@@ -245,10 +245,10 @@ Your module library is included in standard Home Assistant backups:
 Via SSH/Terminal add-on:
 ```bash
 # Backup database
-cp /config/sfpliberate/sfp_library.db /backup/sfp_library_$(date +%Y%m%d).db
+cp /config/sfpvault/sfp_library.db /backup/sfp_library_$(date +%Y%m%d).db
 
 # Restore
-cp /backup/sfp_library_20250101.db /config/sfpliberate/sfp_library.db
+cp /backup/sfp_library_20250101.db /config/sfpvault/sfp_library.db
 ```
 
 ### Restore from Standalone Docker
@@ -259,7 +259,7 @@ Coming soon - export/import feature will allow migration from standalone deploym
 
 ### Data Storage
 
-- All data stored locally in `/config/sfpliberate/`
+- All data stored locally in `/config/sfpvault/`
 - No cloud services or external APIs (except for updates)
 - Module profiles contain only EEPROM data (vendor, model, serial)
 
@@ -325,3 +325,16 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 ## License
 
 MIT License - see repository for full text.
+
+## Upgrading from SFPLiberate (add-on 0.2.x)
+
+The add-on was renamed to SFP Vault in 0.3.0 and has a new slug (`sfpvault`), so Home
+Assistant lists it as a separate add-on.
+
+1. Stop the old **SFPLiberate** add-on, so its database is not in use during the copy.
+2. Install **SFP Vault** from the add-on store and start it.
+3. On first start it copies `/config/sfpliberate/` to `/config/sfpvault/`. The old folder
+   is left untouched.
+4. Check that your modules are there, then uninstall the old **SFPLiberate** add-on.
+5. Delete `/config/sfpliberate/` by hand when you no longer need it.
+

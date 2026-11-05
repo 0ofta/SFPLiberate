@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-SFPLiberate's frontend is built on **Next.js 16.0.1** with **React 19.2.0**, using modern patterns and a clean architectural approach. The application successfully handles multiple deployment modes (standalone, Appwrite, Home Assistant) through feature detection and conditional imports.
+SFP Vault's frontend is built on **Next.js 16.0.1** with **React 19.2.0**, using modern patterns and a clean architectural approach. The application successfully handles multiple deployment modes (standalone, Appwrite, Home Assistant) through feature detection and conditional imports.
 
 ### Key Strengths
 
@@ -190,7 +190,7 @@ Next.js 16 introduces the `"use cache"` directive for opt-in caching of Server C
 
 **Example:**
 ```typescript
-// NOT currently used in SFPLiberate
+// NOT currently used in SFP Vault
 export async function getModules() {
   "use cache";
 
@@ -933,7 +933,7 @@ export default function Page() {
   return (
     <div>
       <section>
-        <h1>SFPLiberate</h1>
+        <h1>SFP Vault</h1>
         <p>Companion app for...</p>
       </section>
 

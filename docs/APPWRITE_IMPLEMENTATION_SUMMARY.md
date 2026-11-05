@@ -245,7 +245,7 @@ appwrite deploy bucket
 
 ```bash
 # From project root
-cd /path/to/SFPLiberate
+cd /path/to/sfpvault
 
 # Deploy database schema
 appwrite deploy collection

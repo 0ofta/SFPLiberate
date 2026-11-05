@@ -1,6 +1,6 @@
 # Environment Variables Reference
 
-This document lists all environment variables used in SFPLiberate.
+This document lists all environment variables used in SFP Vault.
 
 ## Quick Reference
 
@@ -33,7 +33,7 @@ Set these in **Appwrite Console > Sites > Your Site > Environment Variables**:
 
 ```bash
 # Backend API (Appwrite Function URL)
-APPWRITE_SITE_API_URL=https://api.sfpliberate.com
+APPWRITE_SITE_API_URL=https://api.sfpvault.com
 
 # Feature Flags
 APPWRITE_SITE_ENABLE_AUTH=true
@@ -126,7 +126,7 @@ NODE_ENV=development
 
 | Variable | Example | Description |
 |----------|---------|-------------|
-| `NEXT_PUBLIC_API_URL` | `https://api.sfpliberate.com` | Backend API base URL |
+| `NEXT_PUBLIC_API_URL` | `https://api.sfpvault.com` | Backend API base URL |
 | `BACKEND_URL` | `http://backend` | Internal backend URL (Docker only) |
 
 ### Feature Flags
@@ -172,7 +172,7 @@ APPWRITE_BUCKET_ID=sfp_eeprom_data
    # Use auto-injected variables (no hardcoding needed!)
    NEXT_PUBLIC_APPWRITE_SITE_API_ENDPOINT=${APPWRITE_SITE_API_ENDPOINT}
    NEXT_PUBLIC_APPWRITE_SITE_PROJECT_ID=${APPWRITE_SITE_PROJECT_ID}
-   NEXT_PUBLIC_API_URL=https://api.sfpliberate.com
+   NEXT_PUBLIC_API_URL=https://api.sfpvault.com
    NEXT_PUBLIC_ENABLE_WEB_BLUETOOTH=true
    NEXT_PUBLIC_ENABLE_BLE_PROXY=true
    NEXT_PUBLIC_ENABLE_COMMUNITY_FEATURES=false
@@ -285,7 +285,7 @@ Set these in **GitHub Repository Settings > Secrets and variables > Actions**:
 | `APPWRITE_PROJECT_ID` | Your project ID | `65f8a3b2e4d1f23` |
 | `APPWRITE_API_KEY` | Server API key | `919c2d18fb5d4...` |
 | `APPWRITE_SITE_ID` | Your site ID | `65f8a3b2e4d1f24` |
-| `PUBLIC_API_URL` | Public backend URL | `https://api.sfpliberate.com` |
+| `PUBLIC_API_URL` | Public backend URL | `https://api.sfpvault.com` |
 
 > **Note**: GitHub secrets are only needed for manual deployment workflow. Git auto-deploy doesn't require GitHub secrets.
 
@@ -322,4 +322,4 @@ Set these in **GitHub Repository Settings > Secrets and variables > Actions**:
 - [Next.js Environment Variables](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables)
 - [Appwrite Sites Environment Variables](https://appwrite.io/docs/products/sites/develop#appwrite-specific-environment-variables)
 - [Docker Compose Environment Variables](https://docs.docker.com/compose/environment-variables/)
-- [SFPLiberate Deployment Guide](./APPWRITE_SITES_DEPLOYMENT.md)
+- [SFP Vault Deployment Guide](./APPWRITE_SITES_DEPLOYMENT.md)

@@ -1,8 +1,8 @@
-# Docker Compose file for SFPLiberate
+# Docker Compose file for SFP Vault
 # Compose Spec (no version field needed for v2.40+)
 # https://docs.docker.com/compose/compose-file/
 
-name: sfpliberate
+name: sfpvault
 
 services:
   backend:
@@ -16,8 +16,8 @@ services:
         - VCS_REF=${VCS_REF}
         - VERSION=${VERSION:-dev}
       # Enable BuildKit for better caching and performance
-    image: sfpliberate-backend:${VERSION:-latest}
-    container_name: sfpliberate-backend
+    image: sfpvault-backend:${VERSION:-latest}
+    container_name: sfpvault-backend
 
     # Restart policy
     restart: unless-stopped
@@ -80,9 +80,9 @@ services:
 
     # Labels
     labels:
-      - "com.sfpliberate.service=backend"
-      - "com.sfpliberate.description=FastAPI backend for SFP module management"
-      - "com.sfpliberate.version=${VERSION:-dev}"
+      - "com.sfpvault.service=backend"
+      - "com.sfpvault.description=FastAPI backend for SFP module management"
+      - "com.sfpvault.version=${VERSION:-dev}"
 
   frontend:
     build:
@@ -92,8 +92,8 @@ services:
         - BUILD_DATE=${BUILD_DATE}
         - VCS_REF=${VCS_REF}
         - VERSION=${VERSION:-dev}
-    image: sfpliberate-frontend:${VERSION:-latest}
-    container_name: sfpliberate-frontend
+    image: sfpvault-frontend:${VERSION:-latest}
+    container_name: sfpvault-frontend
 
     # Restart policy
     restart: unless-stopped
@@ -148,14 +148,14 @@ services:
 
     # Labels
     labels:
-      - "com.sfpliberate.service=frontend"
-      - "com.sfpliberate.description=Next.js frontend with API proxy"
-      - "com.sfpliberate.version=${VERSION:-dev}"
+      - "com.sfpvault.service=frontend"
+      - "com.sfpvault.description=Next.js frontend with API proxy"
+      - "com.sfpvault.version=${VERSION:-dev}"
       - "traefik.enable=true"
-      - "traefik.http.routers.sfpliberate.rule=Host(`${DOMAIN:-localhost}`)"
-      - "traefik.http.routers.sfpliberate.entrypoints=websecure"
-      - "traefik.http.routers.sfpliberate.tls.certresolver=letsencrypt"
-      - "traefik.http.services.sfpliberate.loadbalancer.server.port=3000"
+      - "traefik.http.routers.sfpvault.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.sfpvault.entrypoints=websecure"
+      - "traefik.http.routers.sfpvault.tls.certresolver=letsencrypt"
+      - "traefik.http.services.sfpvault.loadbalancer.server.port=3000"
 
 networks:
   sfp-internal:
@@ -164,7 +164,7 @@ networks:
       config:
         - subnet: 172.25.0.0/24
     labels:
-      - "com.sfpliberate.network=internal"
+      - "com.sfpvault.network=internal"
 
 volumes:
   # Named volume for backend data persistence
@@ -172,8 +172,8 @@ volumes:
   backend_data:
     driver: local
     labels:
-      - "com.sfpliberate.volume=backend-data"
-      - "com.sfpliberate.backup=true"
+      - "com.sfpvault.volume=backend-data"
+      - "com.sfpvault.backup=true"
     # Volume is stored in Docker's volume directory (e.g., /var/lib/docker/volumes/)
-    # To backup: docker run --rm -v sfpliberate_backend_data:/data -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz /data
-    # To restore: docker run --rm -v sfpliberate_backend_data:/data -v $(pwd):/backup alpine tar xzf /backup/backup.tar.gz
+    # To backup: docker run --rm -v sfpvault_backend_data:/data -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz /data
+    # To restore: docker run --rm -v sfpvault_backend_data:/data -v $(pwd):/backup alpine tar xzf /backup/backup.tar.gz

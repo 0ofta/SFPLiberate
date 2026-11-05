@@ -12,7 +12,7 @@ This guide covers manual configuration needed in the Appwrite Console for Sites 
 
 **URL Pattern**: `https://cloud.appwrite.io/console/project-<PROJECT_ID>/sites/site-<SITE_ID>/settings`
 
-Or navigate: Console → Sites → sfpliberate → Settings
+Or navigate: Console → Sites → sfpvault → Settings
 
 ### 1.2 Configure Build Settings
 
@@ -120,7 +120,7 @@ Add these 9 variables:
 | `DEPLOYMENT_MODE` | `appwrite` | Triggers Appwrite mode in backend |
 | `APPWRITE_ENDPOINT` | `https://nyc.cloud.appwrite.io/v1` | Appwrite API endpoint |
 | `APPWRITE_PROJECT_ID` | `<your-project-id>` | From Console |
-| `APPWRITE_DATABASE_ID` | `sfpliberate` | Database ID |
+| `APPWRITE_DATABASE_ID` | `sfpvault` | Database ID |
 | `APPWRITE_COLLECTION_ID` | `sfp_modules` | Collection ID |
 | `APPWRITE_BUCKET_ID` | `sfp_eeprom_data` | Storage bucket ID |
 | `LOG_LEVEL` | `INFO` | Logging level |

@@ -6,7 +6,7 @@
 
 ## Summary
 
-Successfully reverse-engineered and implemented the SFP Wizard's BLE write protocol based on device log analysis and API discovery. The write functionality is now fully operational and integrated into the SFPLiberate application.
+Successfully reverse-engineered and implemented the SFP Wizard's BLE write protocol based on device log analysis and API discovery. The write functionality is now fully operational and integrated into the SFP Vault application.
 
 ## What Was Discovered
 

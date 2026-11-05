@@ -1,6 +1,6 @@
-# SFPLiberate Deployment Guide
+# SFP Vault Deployment Guide
 
-Complete guide for deploying SFPLiberate in production and development environments.
+Complete guide for deploying SFP Vault in production and development environments.
 
 ---
 
@@ -27,6 +27,20 @@ This guide covers **self-hosted full-stack deployment**. For other deployment mo
 
 ---
 
+## Upgrading from SFPLiberate (Docker)
+
+The Compose project is now `sfpvault`, so the data volume is `sfpvault_backend_data`.
+Copy the old volume once before the first start:
+
+```bash
+docker compose -p sfpliberate down
+docker volume create sfpvault_backend_data
+docker run --rm -v sfpliberate_backend_data:/from:ro -v sfpvault_backend_data:/to alpine cp -a /from/. /to/
+docker compose up -d --build
+```
+
+The old `sfpliberate_backend_data` volume is kept; remove it with `docker volume rm` once all is well.
+
 ## Quick Start
 
 ### Prerequisites
@@ -42,7 +56,7 @@ This guide covers **self-hosted full-stack deployment**. For other deployment mo
 ```bash
 # Clone repository
 git clone https://github.com/0ofta/SFPLiberate.git
-cd SFPLiberate
+cd SFP Vault
 
 # Start production environment
 make prod
@@ -303,7 +317,7 @@ make logs-frontend
 docker-compose logs --tail=100
 
 # Follow specific container
-docker logs -f sfpliberate-backend
+docker logs -f sfpvault-backend
 ```
 
 ### Health Checks
@@ -318,7 +332,7 @@ curl http://localhost:8080/             # Frontend
 
 # Docker health status
 docker-compose ps
-docker inspect sfpliberate-backend | jq '.[0].State.Health'
+docker inspect sfpvault-backend | jq '.[0].State.Health'
 ```
 
 ### Monitoring Stack (Optional)
@@ -366,7 +380,7 @@ docker-compose --log-opt max-size=10m --log-opt max-file=3
 make db-backup
 
 # Automated daily backups (crontab)
-0 2 * * * cd /app/SFPLiberate && make db-backup
+0 2 * * * cd /app/sfpvault && make db-backup
 
 # Backup to external storage
 make db-backup && \
@@ -394,7 +408,7 @@ docker-compose exec -T backend cat /app/data/sfp_library.db \
   > "$BACKUP_DIR/sfp_library.db"
 
 # Backup submissions
-docker cp sfpliberate-backend:/app/data/submissions \
+docker cp sfpvault-backend:/app/data/submissions \
   "$BACKUP_DIR/submissions"
 
 # Backup config
@@ -415,9 +429,9 @@ cat backups/sfp_library_YYYYMMDD_HHMMSS.db | \
   docker-compose exec -T backend tee /app/data/sfp_library.db > /dev/null
 
 # Or restore volume
-docker volume rm sfpliberate_backend_data
-docker volume create sfpliberate_backend_data
-docker run --rm -v sfpliberate_backend_data:/data \
+docker volume rm sfpvault_backend_data
+docker volume create sfpvault_backend_data
+docker run --rm -v sfpvault_backend_data:/data \
   -v $(pwd)/backups:/backup \
   alpine sh -c "cd /data && tar xzf /backup/backup.tar.gz"
 
@@ -534,7 +548,7 @@ docker-compose exec backend env
 docker-compose exec frontend env
 
 # Network debugging
-docker network inspect sfpliberate_sfp-internal
+docker network inspect sfpvault_sfp-internal
 docker-compose exec backend ping frontend
 docker-compose exec frontend ping backend
 
@@ -564,10 +578,10 @@ SELECT COUNT(*) FROM sfp_modules;
 ### HTTPS Setup (Nginx)
 
 ```nginx
-# /etc/nginx/sites-available/sfpliberate
+# /etc/nginx/sites-available/sfpvault
 server {
     listen 443 ssl http2;
-    server_name sfpliberate.example.com;
+    server_name sfpvault.example.com;
 
     ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
@@ -629,7 +643,7 @@ Already configured in `.github/workflows/ci.yml`:
 ```bash
 # On your server
 git clone https://github.com/0ofta/SFPLiberate.git
-cd SFPLiberate
+cd SFP Vault
 cp .env.example .env
 # Edit .env with production settings
 make deploy
@@ -649,7 +663,7 @@ deploy:
         username: ${{ secrets.PROD_USER }}
         key: ${{ secrets.SSH_KEY }}
         script: |
-          cd /app/SFPLiberate
+          cd /app/sfpvault
           git pull
           make deploy
 ```

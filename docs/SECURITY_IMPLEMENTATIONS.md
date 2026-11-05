@@ -195,7 +195,7 @@ npm install --save-dev @types/dompurify
 ### Step 2: Deploy Appwrite Collections
 
 ```bash
-cd /home/user/SFPLiberate
+cd /home/user/sfpvault
 appwrite login
 appwrite deploy collection
 ```

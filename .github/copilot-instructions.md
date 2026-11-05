@@ -1,7 +1,7 @@
-# SFPLiberate – AI Coding Agent Instructions
+# SFP Vault – AI Coding Agent Instructions
 
 ## Project Overview
-SFPLiberate is a Web Bluetooth companion app for the Ubiquiti SFP Wizard (UACC-SFP-Wizard) that captures SFP/SFP+ module EEPROM data over BLE, stores it in a local library, and aims to enable cloning/reprogramming modules. The architecture is a **browser-based BLE client** (vanilla JS) + **Dockerized Python FastAPI backend** with SQLite storage, served through NGINX reverse proxy.
+SFP Vault is a Web Bluetooth companion app for the Ubiquiti SFP Wizard (UACC-SFP-Wizard) that captures SFP/SFP+ module EEPROM data over BLE, stores it in a local library, and aims to enable cloning/reprogramming modules. The architecture is a **browser-based BLE client** (vanilla JS) + **Dockerized Python FastAPI backend** with SQLite storage, served through NGINX reverse proxy.
 
 ## Architecture & Data Flow
 
@@ -85,13 +85,13 @@ When adding columns to `sfp_modules` table:
 
 ### TODOs and Placeholders
 - Functions suffixed with `TODO` (e.g., `loadCommunityModulesTODO()`) are scaffolds—alert user when clicked
-- `COMMUNITY_INDEX_URL` constant awaits real GitHub Pages URL from separate `SFPLiberate/modules` repo
+- `COMMUNITY_INDEX_URL` constant awaits real GitHub Pages URL from separate `sfpvault/modules` repo
 - Write logic in `writeSfp()` is intentionally incomplete—requires BLE command discovery (see inline comments)
 
 ### Community Module Submission Flow
 1. User reads module → clicks "Upload to Community" → frontend calls `POST /api/submissions`
 2. Backend writes to disk inbox: `/app/data/submissions/{uuid}/eeprom.bin` + `metadata.json`
-3. Maintainers manually review inbox, validate, and PR to `SFPLiberate/modules` repo with CI validation
+3. Maintainers manually review inbox, validate, and PR to `sfpvault/modules` repo with CI validation
 4. App fetches `index.json` from GitHub Pages to populate community list (import endpoint pending)
 
 ## Common Pitfalls
@@ -117,7 +117,7 @@ When adding columns to `sfp_modules` table:
 
 - **SFF-8472 Spec**: EEPROM layout standard (vendor @ bytes 20-36, model @ 40-56, serial @ 68-84)
 - **Web Bluetooth API**: Browser support varies—Chrome/Edge preferred, Safari experimental
-- **Planned GitHub Repos**: `SFPLiberate/modules` (community index + blobs), `SFPLiberate/site` (docs via MkDocs/Docusaurus)
+- **Planned GitHub Repos**: `sfpvault/modules` (community index + blobs), `sfpvault/site` (docs via MkDocs/Docusaurus)
 - **Official Hardware**: Ubiquiti UACC-SFP-Wizard (ESP32-class SFP programmer, not affiliated with this project)
 
 ## Documentation Files

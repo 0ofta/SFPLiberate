@@ -1,10 +1,10 @@
-# SFPLiberate Home Assistant Add-On
+# SFP Vault Home Assistant Add-On
 
-Complete guide to installing, configuring, and using the SFPLiberate Home Assistant Add-On.
+Complete guide to installing, configuring, and using the SFP Vault Home Assistant Add-On.
 
 ## Overview
 
-The SFPLiberate Home Assistant Add-On provides the easiest way to use SFPLiberate with your Ubiquiti SFP Wizard. It integrates directly with Home Assistant's Bluetooth infrastructure, automatically discovers devices, and requires zero Docker knowledge.
+The SFP Vault Home Assistant Add-On provides the easiest way to use SFP Vault with your Ubiquiti SFP Wizard. It integrates directly with Home Assistant's Bluetooth infrastructure, automatically discovers devices, and requires zero Docker knowledge.
 
 ## Installation
 
@@ -20,7 +20,7 @@ The SFPLiberate Home Assistant Add-On provides the easiest way to use SFPLiberat
 
    [![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2F0ofta%2FSFPLiberate)
 
-2. Install the "SFPLiberate" add-on
+2. Install the "SFP Vault" add-on
 3. (Optional) Configure settings in the Configuration tab
 4. Click **START**
 5. Wait for startup to complete (check logs if needed)
@@ -34,7 +34,7 @@ If the button doesn't work:
 2. Click the **⋮** menu → **Repositories**
 3. Add: `https://github.com/0ofta/SFPLiberate`
 4. Refresh the add-on store
-5. Find "SFPLiberate" and click **INSTALL**
+5. Find "SFP Vault" and click **INSTALL**
 
 ## Configuration
 
@@ -103,7 +103,7 @@ If your Home Assistant host has a built-in Bluetooth adapter:
 2. Click **+ ADD INTEGRATION**
 3. Search for "Bluetooth"
 4. Follow setup wizard
-5. Start the SFPLiberate add-on
+5. Start the SFP Vault add-on
 
 The add-on will automatically use the host adapter.
 
@@ -113,7 +113,7 @@ Shelly Plus devices with Bluetooth also work:
 
 1. Ensure Shelly device is integrated in HA
 2. Enable Bluetooth on the Shelly (check Shelly docs)
-3. Restart the SFPLiberate add-on
+3. Restart the SFP Vault add-on
 4. Devices will appear automatically
 
 ## Usage
@@ -154,10 +154,10 @@ Shelly Plus devices with Bluetooth also work:
 
 ### Data Storage
 
-All data is stored in `/config/sfpliberate/`:
+All data is stored in `/config/sfpvault/`:
 
 ```
-/config/sfpliberate/
+/config/sfpvault/
 ├── sfp_library.db          # SQLite database with module profiles
 └── submissions/            # User-submitted module profiles
 ```
@@ -168,7 +168,7 @@ Your SFP library is **automatically included** in Home Assistant backups:
 
 1. Go to **Settings** → **System** → **Backups**
 2. Click **CREATE BACKUP**
-3. Your SFPLiberate data is included
+3. Your SFP Vault data is included
 
 ### Manual Backup
 
@@ -176,14 +176,26 @@ Via SSH/Terminal add-on:
 
 ```bash
 # Backup database
-cp /config/sfpliberate/sfp_library.db /backup/sfp_library_$(date +%Y%m%d).db
+cp /config/sfpvault/sfp_library.db /backup/sfp_library_$(date +%Y%m%d).db
 
 # List backups
 ls -lh /backup/sfp_library_*.db
 
 # Restore from backup
-cp /backup/sfp_library_20250101.db /config/sfpliberate/sfp_library.db
+cp /backup/sfp_library_20250101.db /config/sfpvault/sfp_library.db
 ```
+
+### Upgrading from SFPLiberate (add-on 0.2.x)
+
+The add-on was renamed to SFP Vault in 0.3.0 and has a new slug (`sfpvault`), so Home
+Assistant lists it as a separate add-on.
+
+1. Stop the old **SFPLiberate** add-on, so its database is not in use during the copy.
+2. Install **SFP Vault** from the add-on store and start it.
+3. On first start it copies `/config/sfpliberate/` to `/config/sfpvault/`. The old folder
+   is left untouched.
+4. Check that your modules are there, then uninstall the old **SFPLiberate** add-on.
+5. Delete `/config/sfpliberate/` by hand when you no longer need it.
 
 ### Migration from Standalone Docker
 
@@ -210,7 +222,7 @@ Coming soon: Export/import feature will allow seamless migration from standalone
    - Restart add-on
 5. **Enable debug logging:**
    - Configuration → `log_level: debug`
-   - Check logs: Settings → Add-ons → SFPLiberate → Logs
+   - Check logs: Settings → Add-ons → SFP Vault → Logs
 
 ### Connection timeout
 
@@ -240,7 +252,7 @@ Coming soon: Export/import feature will allow seamless migration from standalone
 
 **Solutions:**
 1. **Check add-on is running:**
-   - Settings → Add-ons → SFPLiberate
+   - Settings → Add-ons → SFP Vault
    - Status should show "Started"
 2. **Review add-on logs:**
    - Click **Log** tab
@@ -264,18 +276,18 @@ Coming soon: Export/import feature will allow seamless migration from standalone
    - System → Hardware → Storage
    - Ensure >1GB free
 2. **Check permissions:**
-   - `/config/sfpliberate/` should be writable
+   - `/config/sfpvault/` should be writable
    - Restart add-on to reset permissions
 3. **Backup and reset:**
-   - Backup: `cp /config/sfpliberate/sfp_library.db /backup/`
+   - Backup: `cp /config/sfpvault/sfp_library.db /backup/`
    - Stop add-on
-   - Delete: `rm /config/sfpliberate/sfp_library.db`
+   - Delete: `rm /config/sfpvault/sfp_library.db`
    - Start add-on (creates new DB)
    - Restore if needed
 
 ### Custom device names not matching
 
-**Symptom:** Device appears in HA but not in SFPLiberate
+**Symptom:** Device appears in HA but not in SFP Vault
 
 **Solution:**
 1. Find device in HA:
@@ -328,7 +340,7 @@ log_level: debug
 ```
 
 **Log locations:**
-- Add-on logs: Settings → Add-ons → SFPLiberate → Logs
+- Add-on logs: Settings → Add-ons → SFP Vault → Logs
 - System logs: Settings → System → Logs
 
 **What to look for:**
@@ -352,7 +364,7 @@ Users access via the **OPEN WEB UI** button - no manual URL entry required.
 
 ### Data Storage
 
-- All module data stored locally in `/config/sfpliberate/`
+- All module data stored locally in `/config/sfpvault/`
 - No cloud services or external APIs (except for updates)
 - Module profiles contain only EEPROM data (vendor, model, serial, wavelength, etc.)
 

@@ -35,7 +35,7 @@ gh secret set APPWRITE_API_KEY --body "<your-api-key>"
 
 ```bash
 # Database ID
-gh secret set APPWRITE_DATABASE_ID --body "sfpliberate"
+gh secret set APPWRITE_DATABASE_ID --body "sfpvault"
 
 # Collection ID
 gh secret set APPWRITE_COLLECTION_ID --body "sfp_modules"
@@ -48,7 +48,7 @@ gh secret set APPWRITE_BUCKET_ID --body "sfp_eeprom_data"
 
 ```bash
 # Site ID (from Console → Sites)
-gh secret set APPWRITE_SITE_ID --body "sfpliberate"
+gh secret set APPWRITE_SITE_ID --body "sfpvault"
 
 # Function ID (from Console → Functions - create function first!)
 # gh secret set APPWRITE_FUNCTION_ID --body "<function-id-after-creating>"

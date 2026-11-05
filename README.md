@@ -1,8 +1,10 @@
-# SFPLiberate
+# SFP Vault
+
+*Forked from [SFPLiberate](https://github.com/josiah-nelson/SFPLiberate) by Josiah Nelson.*
 
 **A community-driven web tool to unlock the full potential of the Ubiquiti SFP Wizard.**
 
-SFPLiberate is a companion web application for the **Ubiquiti SFP Wizard (UACC-SFP-Wizard)**, enabling you to capture, store, and manage unlimited SFP/SFP+ module EEPROM profiles on your local machine or in the cloud.
+SFP Vault is a companion web application for the **Ubiquiti SFP Wizard (UACC-SFP-Wizard)**, enabling you to capture, store, and manage unlimited SFP/SFP+ module EEPROM profiles on your local machine or in the cloud.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](docker-compose.yml)
@@ -14,7 +16,7 @@ SFPLiberate is a companion web application for the **Ubiquiti SFP Wizard (UACC-S
 ```bash
 # Clone the repository
 git clone https://github.com/0ofta/SFPLiberate.git
-cd SFPLiberate
+cd SFP Vault
 
 # Start the application
 docker-compose up --build
@@ -34,7 +36,7 @@ The Ubiquiti SFP Wizard is a powerful standalone device, but has limitations:
 - **No way to "copy" a module** unless you physically have one to read
 - **No persistent library** of your SFP configurations
 
-**SFPLiberate solves this** by providing:
+**SFP Vault solves this** by providing:
 
 ✅ **Unlimited Storage** - Save as many module profiles as you want
 ✅ **Clone Without Originals** - Write profiles you've saved previously
@@ -75,7 +77,7 @@ The Ubiquiti SFP Wizard is a powerful standalone device, but has limitations:
 
 **Installation:**
 1. Click the "Add to Home Assistant" button above
-2. Install the "SFPLiberate" add-on
+2. Install the "SFP Vault" add-on
 3. Start the add-on
 4. Click "OPEN WEB UI"
 
@@ -306,7 +308,7 @@ Comprehensive documentation is available in `/docs`:
 
 ### BLE Protocol
 
-SFPLiberate uses the **Web Bluetooth API** to communicate with the SFP Wizard over BLE.
+SFP Vault uses the **Web Bluetooth API** to communicate with the SFP Wizard over BLE.
 
 **Discovered Protocol (firmware v1.0.10):**
 
@@ -449,8 +451,8 @@ This project is an independent, community-driven effort and is **not affiliated 
 
 ## Project History
 
-SFPLiberate was originally created by [Josiah Nelson](https://github.com/josiah-nelson) in November 2025, who reverse-engineered the SFP Wizard's undocumented BLE protocol (service/characteristic UUIDs, command set, and write-chunking behavior) against real hardware — the hardest and most valuable part of this project — and built out the original application around it. The original repository went dormant, and several core features (persistent module storage in standalone mode, and the Home Assistant add-on) turned out to be broken at the time development stopped. This fork picks the project back up: those issues are fixed, and development continues here as SFPLiberate's way forward.
+SFP Vault is forked from [SFPLiberate](https://github.com/josiah-nelson/SFPLiberate), created by [Josiah Nelson](https://github.com/josiah-nelson) in November 2025. He reverse-engineered the SFP Wizard's undocumented BLE protocol (service/characteristic UUIDs, command set, and write-chunking behavior) against real hardware — the hardest and most valuable part of this project — and built the original application around it. The original repository went dormant with several core features (persistent module storage in standalone mode, and the Home Assistant add-on) broken. This fork fixed those, has since moved well beyond the original code base, and continues under its own name, SFP Vault.
 
 ---
 
-**Built with ❤️ by the SFPLiberate community**
+**Built with ❤️ by the SFP Vault community**

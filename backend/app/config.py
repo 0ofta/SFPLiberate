@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # API
     api_v1_prefix: str = "/api/v1"
-    project_name: str = "SFPLiberate API"
+    project_name: str = "SFP Vault API"
     version: str = "1.0.0"
 
     # CORS
@@ -88,7 +88,7 @@ class Settings(BaseSettings):
     database_backup_enabled: bool = True
     database_backup_interval: int = 24  # Backup interval in hours
     database_backup_max_count: int = 7  # Maximum number of backups to keep
-    database_backup_path: str = "/config/sfpliberate/backups"  # Backup directory
+    database_backup_path: str = "/config/sfpvault/backups"  # Backup directory
 
 
 @lru_cache

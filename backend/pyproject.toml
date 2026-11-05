@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "sfpliberate-backend"
+name = "sfpvault-backend"
 version = "1.0.0"
-description = "Backend API for SFPLiberate - SFP Wizard companion tool"
-authors = ["SFPLiberate Contributors"]
+description = "Backend API for SFP Vault - SFP Wizard companion tool"
+authors = ["SFP Vault Contributors"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

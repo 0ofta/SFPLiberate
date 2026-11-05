@@ -1,4 +1,4 @@
-# SFPLiberate Cleanup & Optimization Plan
+# SFP Vault Cleanup & Optimization Plan
 **Pre-Alpha Greenfield Refactor**
 **Date:** November 4, 2025
 **Status:** Draft for Review
@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-The SFPLiberate codebase has successfully transitioned from vanilla JavaScript to Next.js 16 and has begun backend modernization with SQLAlchemy/Poetry. However, the transition is **incomplete and inconsistent**, leaving the codebase in a hybrid state with:
+The SFP Vault codebase has successfully transitioned from vanilla JavaScript to Next.js 16 and has begun backend modernization with SQLAlchemy/Poetry. However, the transition is **incomplete and inconsistent**, leaving the codebase in a hybrid state with:
 
 - **Dual backend implementations** (old SQLite vs new SQLAlchemy - old is active!)
 - **Severely outdated documentation** (CLAUDE.md describes non-existent vanilla JS)
@@ -322,7 +322,7 @@ Appwrite code exists but unclear if actively maintained or tested.
 - **Cons:** Requires thorough audit
 
 **Option C: Move to Separate Repo/Branch**
-- Extract to `SFPLiberate-ui-templates` repo
+- Extract to `sfpvault-ui-templates` repo
 - **Pros:** Available but not in main codebase
 - **Cons:** Extra maintenance
 
@@ -544,7 +544,7 @@ Appwrite code exists but unclear if actively maintained or tested.
 ### 7.2 Docker Image Size
 **Current Sizes:** (Unknown, need to measure)
 **Action:**
-- Build and measure: `docker images sfpliberate-*`
+- Build and measure: `docker images sfpvault-*`
 - Optimize:
   - Multi-stage builds (already done ✅)
   - Remove unnecessary files in final stage

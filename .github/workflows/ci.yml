@@ -11,8 +11,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/sfpliberate-backend
-  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/sfpliberate-frontend
+  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/sfpvault-backend
+  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/sfpvault-frontend
   # Note: Appwrite deployments are handled separately via deploy-appwrite.yml
   # This workflow builds standalone Docker images only (no Appwrite references)
 
@@ -160,7 +160,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/sfpliberate-${{ matrix.service }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/sfpvault-${{ matrix.service }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -231,7 +231,7 @@ jobs:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     environment:
       name: production
-      url: https://sfpliberate.example.com
+      url: https://sfpvault.example.com
     
     steps:
       - name: Checkout code

@@ -4,7 +4,7 @@ Complete implementation of Appwrite-based authentication system with `admin` and
 
 ## Overview
 
-SFPLiberate supports two deployment modes:
+SFP Vault supports two deployment modes:
 
 1. **Standalone** (Docker, no auth) - Default for self-hosted deployments
 2. **Appwrite** (Cloud with auth) - Invite-only access with role-based permissions
