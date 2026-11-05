@@ -3,16 +3,17 @@
 /**
  * Settings Page
  * 
- * Admin-only page for configuring BLE proxy and user preferences
+ * Connection mode, saved device, BLE proxy and (with auth) account details.
+ * Admin-only when auth is enabled.
  */
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { BleProxySettings } from '@/components/ble/BleProxySettings';
+import { ConnectionSettings } from '@/components/ble/ConnectionSettings';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { isAuthEnabled } from '@/lib/features-client';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Bluetooth, Shield, User } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -27,16 +28,14 @@ function SettingsContent() {
     const auth = useAuthContext();
 
     return (
-        <div className="container max-w-4xl py-8 space-y-8">
+        <div className="mx-auto w-full max-w-4xl space-y-8 px-4 py-6 sm:px-6">
             {/* Header */}
             <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
                 <p className="text-muted-foreground">
-                    Manage your account and configure BLE proxy settings
+                    Connection to the SFP Wizard, proxies and account
                 </p>
             </div>
-
-            <Separator />
 
             {/* User Profile Section */}
             {isAuthEnabled() && auth.user && (
@@ -81,6 +80,8 @@ function SettingsContent() {
                     </Card>
                 </div>
             )}
+
+            <ConnectionSettings />
 
             {/* BLE Proxy Settings Section */}
             <div className="space-y-4">

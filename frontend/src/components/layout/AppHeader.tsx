@@ -6,12 +6,19 @@ import { Button } from '@/components/ui/button';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { isAppwrite } from '@/lib/features';
 import { logout } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
-import { LogOut, User, Shield } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LogOut, User, Shield, Settings } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const TAB = 'flex items-center gap-1 rounded-md px-2 py-1 text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white';
+const ACTIVE_TAB = 'bg-muted font-medium text-neutral-900 dark:text-white';
 
 export function AppHeader() {
   const auth = useAuthContext();
   const router = useRouter();
+  const pathname = usePathname() ?? '/';
+  /** Classes for a header tab; `match` decides whether it is the current page. */
+  const tab = (match: boolean) => cn(TAB, match && ACTIVE_TAB);
 
   const handleLogout = async () => {
     try {
@@ -31,12 +38,16 @@ export function AppHeader() {
             SFP Sage
           </Link>
         </div>
-        <nav className="flex items-center gap-3 text-sm">
-          <Link href="/" className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">
+        <nav className="flex items-center gap-1 text-sm">
+          <Link href="/" className={tab(pathname === '/')}>
             Dashboard
           </Link>
-          <Link href="/modules" className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">
+          <Link href="/modules" className={tab(pathname.startsWith('/modules'))}>
             Modules
+          </Link>
+          <Link href="/settings" className={tab(pathname.startsWith('/settings'))}>
+            <Settings className="h-3.5 w-3.5" />
+            Settings
           </Link>
           {isAppwrite() && (
             <Link href="/community" className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">

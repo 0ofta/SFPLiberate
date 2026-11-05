@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 import { ModuleTable } from './ModuleTable';
 import { loadModulesAction } from './actions';
@@ -45,10 +46,12 @@ export default async function ModulesPage() {
   }
 
   return (
-    <ModuleTable
-      initialModules={initialModules}
-      deploymentMode={deploymentMode}
-      initialError={initialError}
-    />
+    <Suspense>
+      <ModuleTable
+        initialModules={initialModules}
+        deploymentMode={deploymentMode}
+        initialError={initialError}
+      />
+    </Suspense>
   );
 }

@@ -165,6 +165,12 @@ See [docs/ESPHOME.md](docs/ESPHOME.md) for complete setup guide.
   data, with "Repair and write" (fixes only those two bytes) or an explicit "Write anyway"
 - **ESPHome Integration** - iOS/Safari support via ESPHome Bluetooth proxies
 
+### Pages
+
+- **Dashboard** - the live SFP Wizard: connect, battery/firmware/module status, read the inserted module and save it to the library.
+- **Modules** - the library: search, a compact list, and a side panel per module with its details, Write to device, Edit fields, comment and Delete. `/modules?open=<id>` opens a module directly.
+- **Settings** - connection mode (Auto, Web Bluetooth, ESPHome proxy, legacy proxy; stored in the browser), forget the saved SFP Wizard, BLE proxy options.
+
 ### Coming Soon 🚧
 
 - **Community Module Repository** - Share and download profiles

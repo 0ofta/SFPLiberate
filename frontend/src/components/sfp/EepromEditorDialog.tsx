@@ -56,7 +56,8 @@ type EepromEditorDialogProps = {
   module: { id: string; name?: string } | null;
   onClose: () => void;
   /** Called after any successful save or repair, so the caller can reload its list. */
-  onSaved: () => void;
+  /** Called after a save, with the id of the module that now holds the edited data. */
+  onSaved: (savedId?: string) => void;
 };
 
 /**
@@ -154,6 +155,7 @@ export function EepromEditorDialog({ module, onClose, onSaved }: EepromEditorDia
     const repository = getModuleRepository();
     setBusy(true);
     try {
+      let savedId = module.id;
       if (isEditedCopy) {
         if (!repository.updateModuleEeprom) throw new Error('Editing modules is not supported in this deployment mode.');
         await repository.updateModuleEeprom(module.id, edited);
@@ -161,13 +163,14 @@ export function EepromEditorDialog({ module, onClose, onSaved }: EepromEditorDia
       } else {
         const baseName = module.name || `Module ${module.id}`;
         const result = await repository.createModule({ name: `${baseName}${EDITED_SUFFIX}`, eepromData: edited, read_from_device: false });
+        savedId = String(result.module.id);
         if (result.isDuplicate) {
           toast.info(`Identical data is already saved as module #${result.module.id}.`);
         } else {
           toast.success(`Saved as new module #${result.module.id}`, { description: `The original #${module.id} is unchanged.` });
         }
       }
-      onSaved();
+      onSaved(savedId);
       onClose();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Save failed.');
